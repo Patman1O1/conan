@@ -1,0 +1,10 @@
+include(clang)
+
+[settings]
+os=Linux
+arch=x86_64
+
+[conf]
+tools.cmake.cmaketoolchain:generator=Unix Makefiles
+tools.build:compiler_executables={"c": "/usr/bin/clang", "cpp": "/usr/bin/clang++"}
+
