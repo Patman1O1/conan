@@ -2,5 +2,13 @@
 
 set -euo pipefail
 
-mv -f "../profiles/cmake/*" "$HOME/.conan2/profiles"
+LOCAL_PROFILES="$HOME/.conan2/profiles"
+REPO_PROFILES="../profiles/cmake"
 
+echo "Installing Conan profiles"
+
+rm -rf "$LOCAL_PROFILES"
+mkdir "$LOCAL_PROFILES"
+cp -rf "$REPO_PROFILES/." "$LOCAL_PROFILES"
+
+echo "Conan profiles successfully installed"
