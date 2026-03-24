@@ -1,4 +1,5 @@
 [settings]
+compiler=apple-clang
 compiler.version=17.0
 compiler.libcxx=libc++
 compiler.cppstd=23
