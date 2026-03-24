@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-mv -f "../profiles/*" "$HOME/.conan2/profiles"
+mv -f "../profiles/cmake/*" "$HOME/.conan2/profiles"
 
