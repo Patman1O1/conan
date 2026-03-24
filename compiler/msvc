@@ -1,0 +1,6 @@
+[settings]
+compiler=msvc
+compiler.version=195
+compiler.update=9
+compiler.cppstd=23
+compiler.cstd=23
