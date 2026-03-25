@@ -1,7 +1,0 @@
-[settings]
-compiler=gcc
-compiler.version=15.2
-compiler.libcxx=libstdc++
-compiler.cstd=gnu23
-compiler.cppstd=gnu23
-compiler.threads=posix
