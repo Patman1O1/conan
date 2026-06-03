@@ -1,12 +1,13 @@
 from conan.api.conan_api import ConanAPI
 from pathlib import Path
+from typing import Final
 import sys
 import shutil
 import click
 import traceback
 
-conan_home: Path = Path(ConanAPI().home_folder)
-conan_repo: Path = Path(__file__).resolve().parent.parent
+CONAN_HOME: Final[Path] = Path(ConanAPI().home_folder)
+CONAN_REPO: Final[Path] = Path(__file__).resolve().parent.parent
 
 def _copy(src_path: Path, dst_path: Path, force: bool) -> None:
     try:
@@ -46,10 +47,10 @@ def export() -> None:
 @click.option("--force", "-f", is_flag=True, default=False)
 def template(name: str, force: bool) -> None:
     # Ensure <conan_home>/templates/command/new exists
-    template_dir: Path = Path("templates/command/new")
-    Path.mkdir(conan_home/template_dir, parents=True, exist_ok=True)
+    templates_dir: Path = Path("templates/command/new")
+    Path.mkdir(CONAN_HOME/templates_dir, parents=True, exist_ok=True)
 
-    _copy(conan_repo/template_dir/name, conan_home/template_dir/name, force)
+    _copy(CONAN_REPO/templates_dir/name, CONAN_HOME/templates_dir/name, force)
     return
 
 @export.command("cmd")
@@ -58,9 +59,9 @@ def template(name: str, force: bool) -> None:
 def cmd(name: str, force: bool) -> None:
     # Ensure <conan_home>/extensions/commands exists
     cmd_dir: Path = Path("extensions/commands")
-    Path.mkdir(conan_home/cmd_dir, parents=True, exist_ok=True)
+    Path.mkdir(CONAN_HOME/cmd_dir, parents=True, exist_ok=True)
 
-    _copy(conan_repo/cmd_dir/name, conan_home/cmd_dir/name, force)
+    _copy(CONAN_REPO/cmd_dir/name, CONAN_HOME/cmd_dir/name, force)
     return
 
 @export.command("profile")
@@ -68,11 +69,11 @@ def cmd(name: str, force: bool) -> None:
 @click.option("--force", "-f", is_flag=True, default=False)
 def profile(name: str, force: bool) -> None:
     # Ensure <conan_home>/profiles exists
-    Path.mkdir(conan_home/"profiles", parents=True, exist_ok=True)
+    Path.mkdir(CONAN_HOME/"profiles", parents=True, exist_ok=True)
 
-    _copy(conan_repo/"profiles"/name, conan_home/"profiles"/name, force)
+    _copy(CONAN_REPO/"profiles"/name, CONAN_HOME/"profiles"/name, force)
     return
 
 if __name__ == "__main__":
     export()
-    exit(0)
+    sys.exit(0)
