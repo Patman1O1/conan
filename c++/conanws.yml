@@ -1,7 +1,0 @@
-workspace:
-    packages:
-        - array
-        - btree
-        - htable
-        - list
-        - vector
