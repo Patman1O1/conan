@@ -3,7 +3,6 @@
 
 // ISO C Includes
 #include <cstddef>
-#include <cstdint>
 
 // ISO C++ Includes
 #include <algorithm>
@@ -41,9 +40,6 @@ namespace collections {
         using reverse_iterator = std::reverse_iterator<iterator>;
 
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-
-        // ── error ───────────────────────────────────────────────────────────
-        enum class error : std::uint8_t { out_of_range, };
 
         // ── Fields ──────────────────────────────────────────────────────────
         value_type values_[N];
@@ -124,10 +120,11 @@ namespace collections {
         constexpr auto expect_at(
             const size_type index
         ) noexcept -> std::expected<
-            std::reference_wrapper<value_type>, error
+            std::reference_wrapper<value_type>,
+            std::error_code
         > {
             if (index >= N) [[unlikely]] {
-                return std::unexpected(error::out_of_range);
+                return std::unexpected(std::errc::result_out_of_range);
             }
             return std::reference_wrapper<value_type>(this->values_[index]);
         }
@@ -136,10 +133,11 @@ namespace collections {
         constexpr auto expect_at(
             const size_type index
         ) const noexcept -> std::expected<
-            std::reference_wrapper<const value_type>, error
+            std::reference_wrapper<const value_type>,
+            std::error_code
         > {
             if (index >= N) [[unlikely]] {
-                return std::unexpected(error::out_of_range);
+                return std::unexpected(std::errc::result_out_of_range);
             }
 
             return std::reference_wrapper<const value_type>(

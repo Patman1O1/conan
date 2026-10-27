@@ -1,3 +1,3 @@
-# cpp_array_2
+# cpp_array
 
 
