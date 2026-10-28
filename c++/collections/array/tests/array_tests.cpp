@@ -102,6 +102,32 @@ namespace collections::array_testing {
         EXPECT_FALSE(strs_lhs != strs_rhs);
     }
 
+    TEST_F(operator_tests, spaceship_operator_equals_case) {
+        constexpr array ints_lhs = {1, 2, 3};
+        constexpr array ints_rhs = {1, 2, 3};
+
+        static_assert(ints_lhs <=> ints_rhs == 0);
+        static_assert(!(ints_lhs < ints_rhs));
+        static_assert(!(ints_lhs > ints_rhs));
+        static_assert(ints_lhs <= ints_rhs);
+        static_assert(ints_lhs >= ints_rhs);
+
+        EXPECT_TRUE(ints_lhs <=> ints_rhs == 0);
+        EXPECT_TRUE(!(ints_lhs < ints_rhs));
+        EXPECT_TRUE(!(ints_lhs > ints_rhs));
+        EXPECT_TRUE(ints_lhs <= ints_rhs);
+        EXPECT_TRUE(ints_lhs >= ints_rhs);
+
+        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
+        const array<std::string, 3> strs_rhs = {"This", "is a", "test"};
+
+        EXPECT_TRUE(strs_lhs <=> strs_rhs == 0);
+        EXPECT_TRUE(!(strs_lhs < strs_rhs));
+        EXPECT_TRUE(!(strs_lhs > strs_rhs));
+        EXPECT_TRUE(strs_lhs <= strs_rhs);
+        EXPECT_TRUE(strs_lhs >= strs_rhs);
+    }
+
     // ── Method Tests ────────────────────────────────────────────────────────
     // ── Trait Tests ─────────────────────────────────────────────────────────
     TEST_F(trait_tests, is_aggregate) {
