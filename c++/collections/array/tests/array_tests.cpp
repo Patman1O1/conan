@@ -38,10 +38,17 @@ namespace collections::array_testing {
         constexpr array rhs = {1, 2, 3};
 
         static_assert(lhs == rhs);
-        static_assert(!(lhs != rhs));
 
         EXPECT_TRUE(lhs == rhs);
-        EXPECT_FALSE(lhs != rhs);
+    }
+
+    TEST_F(operator_tests, equals_operator_false_case) {
+        constexpr array lhs = {1, 2, 3};
+        constexpr array rhs = {4, 5, 6};
+
+        static_assert(!(lhs == rhs));
+
+        EXPECT_FALSE(lhs == rhs);
     }
 
     // ── Method Tests ────────────────────────────────────────────────────────
