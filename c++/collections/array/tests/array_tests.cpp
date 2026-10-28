@@ -33,101 +33,231 @@ namespace collections::array_testing {
     } // namespace
 
     // ── Operator Tests ──────────────────────────────────────────────────────
-    TEST_F(operator_tests, equals_operator_self_compare) {
-        constexpr array ints = {1, 2, 3};
-        static_assert(ints == ints);
-        EXPECT_TRUE(ints == ints);
+    TEST_F(operator_tests, equals_operator__self_compare) {
+        // Trivial Single Element
+        constexpr array trivial_single = {1};
+        static_assert(trivial_single == trivial_single);
+        EXPECT_TRUE(trivial_single == trivial_single);
+        
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple = {1, 2, 3};
+        static_assert(trivial_multiple == trivial_multiple);
+        EXPECT_TRUE(trivial_multiple == trivial_multiple);
 
-        const array<std::string, 3> strs = {"This", "is a", "test"};
-        EXPECT_TRUE(strs == strs);
+        // Nontrivial Single Element
+        const array<std::string, 1> nontrivial_single = {"This is a test"};
+        EXPECT_TRUE(nontrivial_single == nontrivial_single);
+
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple = {
+            "This", "is a", "test"
+        };
+        EXPECT_TRUE(nontrivial_multiple == nontrivial_multiple); 
     }
 
-    TEST_F(operator_tests, equals_operator_true_case) {
-        constexpr array ints_lhs = {1, 2, 3};
-        constexpr array ints_rhs = {1, 2, 3};
+    TEST_F(operator_tests, equals_operator__true_case) {
+        // Trivial Single Element
+        constexpr array trivial_single_lhs = {1};
+        constexpr array trivial_single_rhs = {1};
+        static_assert(trivial_single_lhs == trivial_single_rhs);
+        EXPECT_TRUE(trivial_single_lhs == trivial_single_rhs);
+        
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple_lhs = {1, 2, 3};
+        constexpr array trivial_multiple_rhs = {1, 2, 3};
+        static_assert(trivial_multiple_lhs == trivial_multiple_rhs);
+        EXPECT_TRUE(trivial_multiple_lhs == trivial_multiple_rhs);
 
-        static_assert(ints_lhs == ints_rhs);
+        // Nontrivial Single Element
+        const array<std::string, 1> nontrivial_single_lhs = {"This is a test"};
+        const array<std::string, 1> nontrivial_single_rhs = {"This is a test"};
+        EXPECT_TRUE(nontrivial_single_lhs == nontrivial_single_rhs);
 
-        EXPECT_TRUE(ints_lhs == ints_rhs);
-
-        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
-        const array<std::string, 3> strs_rhs = {"This", "is a", "test"};
-
-        EXPECT_TRUE(strs_lhs == strs_rhs);
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple_lhs = {
+            "This", "is a", "test"
+        };
+        const array<std::string, 3> nontrivial_multiple_rhs = {
+            "This", "is a", "test"
+        };
+        EXPECT_TRUE(nontrivial_multiple_lhs == nontrivial_multiple_rhs); 
     }
 
-    TEST_F(operator_tests, equals_operator_false_case) {
-        constexpr array ints_lhs = {1, 2, 3};
-        constexpr array ints_rhs = {4, 5, 6};
+    TEST_F(operator_tests, equals_operator__false_case) {
+        // Trivial Single Element
+        constexpr array trivial_single_lhs = {1};
+        constexpr array trivial_single_rhs = {2};
+        static_assert(!(trivial_single_lhs == trivial_single_rhs));
+        EXPECT_FALSE(trivial_single_lhs == trivial_single_rhs);
+        
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple_lhs = {1, 2, 3};
+        constexpr array trivial_multiple_rhs = {4, 5, 6};
+        static_assert(!(trivial_multiple_lhs == trivial_multiple_rhs));
+        EXPECT_FALSE(trivial_multiple_lhs == trivial_multiple_rhs);
 
-        static_assert(!(ints_lhs == ints_rhs));
+        // Nontrivial Single Element
+        const array<std::string, 1> nontrivial_single_lhs = {"This is a test"};
+        const array<std::string, 1> nontrivial_single_rhs = {
+            "This is a different test"
+        };
+        EXPECT_FALSE(nontrivial_single_lhs == nontrivial_single_rhs);
 
-        EXPECT_FALSE(ints_lhs == ints_rhs);
-
-        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
-        const array<std::string, 3> strs_rhs = {
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple_lhs = {
+            "This", "is a", "test"
+        };
+        const array<std::string, 3> nontrivial_multiple_rhs = {
             "This", "is a different", "test"
         };
-
-        EXPECT_FALSE(strs_lhs == strs_rhs);
+        EXPECT_FALSE(nontrivial_multiple_lhs == nontrivial_multiple_rhs); 
     }
 
-    TEST_F(operator_tests, not_equals_operator_true_case) {
-        constexpr array ints_lhs = {1, 2, 3};
-        constexpr array ints_rhs = {4, 5, 6};
-
-        static_assert(ints_lhs != ints_rhs);
-
-        EXPECT_TRUE(ints_lhs != ints_rhs);
-
-        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
-        const array<std::string, 3> strs_rhs = {
-            "This", "is a different", "test"
+    TEST_F(operator_tests, equality_operator__not_equals_case) {
+        // Trivial Single Element
+        constexpr array trivial_single_lhs = {1};
+        constexpr array trivial_single_rhs = {2};
+        static_assert(trivial_single_lhs != trivial_single_rhs);
+        static_assert(!(trivial_single_lhs == trivial_single_rhs));
+        EXPECT_TRUE(trivial_single_lhs != trivial_single_rhs);
+        EXPECT_TRUE(!(trivial_single_lhs == trivial_single_rhs));
+ 
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple_lhs = {1, 2, 3};
+        constexpr array trivial_multiple_first_rhs = {0, 2, 3};
+        constexpr array trivial_multiple_middle_rhs = {1, 0, 3};
+        constexpr array trivial_multiple_last_rhs = {1, 2, 0};
+ 
+        static_assert(trivial_multiple_lhs != trivial_multiple_first_rhs);
+        static_assert(trivial_multiple_lhs != trivial_multiple_middle_rhs);
+        static_assert(trivial_multiple_lhs != trivial_multiple_last_rhs);
+        static_assert(!(trivial_multiple_lhs == trivial_multiple_first_rhs));
+        static_assert(!(trivial_multiple_lhs == trivial_multiple_middle_rhs));
+        static_assert(!(trivial_multiple_lhs == trivial_multiple_last_rhs));
+ 
+        EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_first_rhs);
+        EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_middle_rhs);
+        EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_last_rhs);
+        EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_first_rhs));
+        EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_middle_rhs));
+        EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_last_rhs));
+ 
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple_lhs = {
+            "This", "is a", "test"
         };
-
-        EXPECT_TRUE(strs_lhs != strs_rhs);
+        const array<std::string, 3> nontrivial_multiple_rhs = {
+            "This", "is a", "text"
+        };
+ 
+        EXPECT_TRUE(nontrivial_multiple_lhs != nontrivial_multiple_rhs);
+        EXPECT_TRUE(!(nontrivial_multiple_lhs == nontrivial_multiple_rhs));
     }
-
-    TEST_F(operator_tests, not_equals_operator_false_case) {
-        constexpr array ints_lhs = {1, 2, 3};
-        constexpr array ints_rhs = {1, 2, 3};
-
-        static_assert(!(ints_lhs != ints_rhs));
-
-        EXPECT_FALSE(ints_lhs != ints_rhs);
-
-        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
-        const array<std::string, 3> strs_rhs = {"This", "is a", "test"};
-
-        EXPECT_FALSE(strs_lhs != strs_rhs);
+ 
+    TEST_F(operator_tests, spaceship_operator__less_case) {
+        // Trivial Single Element
+        constexpr array trivial_single_lhs = {1};
+        constexpr array trivial_single_rhs = {2};
+        static_assert(trivial_single_lhs <=> trivial_single_rhs < 0);
+        EXPECT_TRUE(trivial_single_lhs <=> trivial_single_rhs < 0);
+ 
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple_lhs = {1, 2, 3};
+        constexpr array trivial_multiple_rhs = {1, 2, 4};
+ 
+        static_assert(trivial_multiple_lhs <=> trivial_multiple_rhs < 0);
+        static_assert(trivial_multiple_lhs < trivial_multiple_rhs);
+        static_assert(!(trivial_multiple_lhs > trivial_multiple_rhs));
+        static_assert(trivial_multiple_lhs <= trivial_multiple_rhs);
+        static_assert(!(trivial_multiple_lhs >= trivial_multiple_rhs));
+ 
+        EXPECT_TRUE(trivial_multiple_lhs <=> trivial_multiple_rhs < 0);
+        EXPECT_TRUE(trivial_multiple_lhs < trivial_multiple_rhs);
+        EXPECT_TRUE(!(trivial_multiple_lhs > trivial_multiple_rhs));
+        EXPECT_TRUE(trivial_multiple_lhs <= trivial_multiple_rhs);
+        EXPECT_TRUE(!(trivial_multiple_lhs >= trivial_multiple_rhs));
+ 
+        // Trivial Multiple Elements
+        constexpr array trivial_lexicographic_lhs = {1, 9, 9};
+        constexpr array trivial_lexicographic_rhs = {2, 0, 0};
+ 
+        static_assert(
+                trivial_lexicographic_lhs <=> trivial_lexicographic_rhs < 0
+        );
+        static_assert(trivial_lexicographic_lhs < trivial_lexicographic_rhs);
+ 
+        EXPECT_TRUE(
+            trivial_lexicographic_lhs <=> trivial_lexicographic_rhs < 0
+        );
+        EXPECT_TRUE(trivial_lexicographic_lhs < trivial_lexicographic_rhs);
+ 
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple_lhs = {
+            "This", "is a", "test"
+        };
+        const array<std::string, 3> nontrivial_multiple_rhs = {
+            "This", "is a", "text"
+        };
+ 
+        EXPECT_TRUE(nontrivial_multiple_lhs <=> nontrivial_multiple_rhs < 0);
+        EXPECT_TRUE(nontrivial_multiple_lhs < nontrivial_multiple_rhs);
+        EXPECT_TRUE(!(nontrivial_multiple_lhs > nontrivial_multiple_rhs));
+        EXPECT_TRUE(nontrivial_multiple_lhs <= nontrivial_multiple_rhs);
+        EXPECT_TRUE(!(nontrivial_multiple_lhs >= nontrivial_multiple_rhs));
     }
-
-    TEST_F(operator_tests, spaceship_operator_equals_case) {
-        constexpr array ints_lhs = {1, 2, 3};
-        constexpr array ints_rhs = {1, 2, 3};
-
-        static_assert(ints_lhs <=> ints_rhs == 0);
-        static_assert(!(ints_lhs < ints_rhs));
-        static_assert(!(ints_lhs > ints_rhs));
-        static_assert(ints_lhs <= ints_rhs);
-        static_assert(ints_lhs >= ints_rhs);
-
-        EXPECT_TRUE(ints_lhs <=> ints_rhs == 0);
-        EXPECT_TRUE(!(ints_lhs < ints_rhs));
-        EXPECT_TRUE(!(ints_lhs > ints_rhs));
-        EXPECT_TRUE(ints_lhs <= ints_rhs);
-        EXPECT_TRUE(ints_lhs >= ints_rhs);
-
-        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
-        const array<std::string, 3> strs_rhs = {"This", "is a", "test"};
-
-        EXPECT_TRUE(strs_lhs <=> strs_rhs == 0);
-        EXPECT_TRUE(!(strs_lhs < strs_rhs));
-        EXPECT_TRUE(!(strs_lhs > strs_rhs));
-        EXPECT_TRUE(strs_lhs <= strs_rhs);
-        EXPECT_TRUE(strs_lhs >= strs_rhs);
+ 
+    TEST_F(operator_tests, spaceship_operator__greater_case) {
+        // Trivial Single Element
+        constexpr array trivial_single_lhs = {2};
+        constexpr array trivial_single_rhs = {1};
+        static_assert(trivial_single_lhs <=> trivial_single_rhs > 0);
+        EXPECT_TRUE(trivial_single_lhs <=> trivial_single_rhs > 0);
+ 
+        // Trivial Multiple Elements
+        constexpr array trivial_multiple_lhs = {1, 2, 4};
+        constexpr array trivial_multiple_rhs = {1, 2, 3};
+ 
+        static_assert(trivial_multiple_lhs <=> trivial_multiple_rhs > 0);
+        static_assert(!(trivial_multiple_lhs < trivial_multiple_rhs));
+        static_assert(trivial_multiple_lhs > trivial_multiple_rhs);
+        static_assert(!(trivial_multiple_lhs <= trivial_multiple_rhs));
+        static_assert(trivial_multiple_lhs >= trivial_multiple_rhs);
+ 
+        EXPECT_TRUE(trivial_multiple_lhs <=> trivial_multiple_rhs > 0);
+        EXPECT_TRUE(!(trivial_multiple_lhs < trivial_multiple_rhs));
+        EXPECT_TRUE(trivial_multiple_lhs > trivial_multiple_rhs);
+        EXPECT_TRUE(!(trivial_multiple_lhs <= trivial_multiple_rhs));
+        EXPECT_TRUE(trivial_multiple_lhs >= trivial_multiple_rhs);
+ 
+        // Trivial Multiple Elements (first difference decides)
+        constexpr array trivial_lexicographic_lhs = {2, 0, 0};
+        constexpr array trivial_lexicographic_rhs = {1, 9, 9};
+ 
+        static_assert(
+            trivial_lexicographic_lhs <=> trivial_lexicographic_rhs > 0
+        );
+        static_assert(trivial_lexicographic_lhs > trivial_lexicographic_rhs);
+ 
+        EXPECT_TRUE(
+            trivial_lexicographic_lhs <=> trivial_lexicographic_rhs > 0
+        );
+        EXPECT_TRUE(trivial_lexicographic_lhs > trivial_lexicographic_rhs);
+ 
+        // Nontrivial Multiple Elements
+        const array<std::string, 3> nontrivial_multiple_lhs = {
+            "This", "is a", "text"
+        };
+        const array<std::string, 3> nontrivial_multiple_rhs = {
+            "This", "is a", "test"
+        };
+ 
+        EXPECT_TRUE(nontrivial_multiple_lhs <=> nontrivial_multiple_rhs > 0);
+        EXPECT_TRUE(!(nontrivial_multiple_lhs < nontrivial_multiple_rhs));
+        EXPECT_TRUE(nontrivial_multiple_lhs > nontrivial_multiple_rhs);
+        EXPECT_TRUE(!(nontrivial_multiple_lhs <= nontrivial_multiple_rhs));
+        EXPECT_TRUE(nontrivial_multiple_lhs >= nontrivial_multiple_rhs);
     }
-
+    
     // ── Method Tests ────────────────────────────────────────────────────────
     // ── Trait Tests ─────────────────────────────────────────────────────────
     TEST_F(trait_tests, is_aggregate) {
