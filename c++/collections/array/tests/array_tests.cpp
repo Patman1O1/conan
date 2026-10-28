@@ -258,12 +258,20 @@ namespace collections::array_testing {
         EXPECT_TRUE(nontrivial_multiple_lhs >= nontrivial_multiple_rhs);
     }
 
-    TEST_F(method_tests, subscript_operator__compile_time) {
+    TEST_F(operator_tests, subscript_operator__compile_time) {
         constexpr array arr = {1, 2, 3};
 
         static_assert(arr[0] == 1);
         static_assert(arr[1] == 2);
         static_assert(arr[2] == 3);
+    }
+
+    TEST(operator_tests, subscript_operator__runtime) {
+        const array<std::string, 3> arr = {"This", "is a", "test"};
+
+        EXPECT_EQ(arr[0], "This");
+        EXPECT_EQ(arr[1], "is a");
+        EXPECT_EQ(arr[2], "test");
     }
     
     // ── Method Tests ────────────────────────────────────────────────────────
