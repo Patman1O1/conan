@@ -33,6 +33,15 @@ namespace collections::array_testing {
     } // namespace
 
     // ── Operator Tests ──────────────────────────────────────────────────────
+    TEST_F(operator_tests, equals_operator_self_compare) {
+        constexpr array ints = {1, 2, 3};
+        static_assert(ints == ints);
+        EXPECT_TRUE(ints == ints);
+
+        const array<std::string, 3> strs = {"This", "is a", "test"};
+        EXPECT_TRUE(strs == strs);
+    }
+
     TEST_F(operator_tests, equals_operator_true_case) {
         constexpr array ints_lhs = {1, 2, 3};
         constexpr array ints_rhs = {1, 2, 3};
