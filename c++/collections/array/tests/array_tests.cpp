@@ -48,12 +48,17 @@ namespace collections::array_testing {
     }
 
     TEST_F(operator_tests, equals_operator_false_case) {
-        constexpr array lhs = {1, 2, 3};
-        constexpr array rhs = {4, 5, 6};
+        constexpr array ints_lhs = {1, 2, 3};
+        constexpr array ints_rhs = {4, 5, 6};
 
-        static_assert(!(lhs == rhs));
+        static_assert(!(ints_lhs == ints_rhs));
 
-        EXPECT_FALSE(lhs == rhs);
+        EXPECT_FALSE(ints_lhs == ints_rhs);
+
+        const array<std::string, 3> strs_lhs = {"This", "is a", "test"};
+        const array<std::string, 3> strs_rhs = {"This", "is a different", "test"};
+
+        EXPECT_FALSE(strs_lhs == strs_rhs);
     }
 
     TEST_F(operator_tests, not_equals_operator_true_case) {
