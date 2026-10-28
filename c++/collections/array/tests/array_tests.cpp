@@ -257,6 +257,14 @@ namespace collections::array_testing {
         EXPECT_TRUE(!(nontrivial_multiple_lhs <= nontrivial_multiple_rhs));
         EXPECT_TRUE(nontrivial_multiple_lhs >= nontrivial_multiple_rhs);
     }
+
+    TEST_F(method_tests, subscript_operator__compile_time) {
+        constexpr array arr = {1, 2, 3};
+
+        static_assert(arr[0] == 1);
+        static_assert(arr[1] == 2);
+        static_assert(arr[2] == 3);
+    }
     
     // ── Method Tests ────────────────────────────────────────────────────────
     // ── Trait Tests ─────────────────────────────────────────────────────────
