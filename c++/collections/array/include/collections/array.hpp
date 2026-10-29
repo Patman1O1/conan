@@ -57,20 +57,20 @@ namespace collections {
             noexcept(std::declval<value_type>() <=> std::declval<value_type>())
         ) -> std::compare_three_way_result_t<value_type> {
             return std::lexicographical_compare_three_way(
-                this->values_, this->values_ + N,
-                rhs.values_, rhs.values_ + N
+                this->values, this->values + N,
+                rhs.values, rhs.values + N
             );
         }
         
         [[nodiscard]]
         constexpr auto operator[](
             const size_type index
-        ) noexcept -> reference { return this->values_[index]; }
+        ) noexcept -> reference { return this->values[index]; }
 
         [[nodiscard]]
         constexpr auto operator[](
             const size_type index
-        ) const noexcept -> const_reference { return this->values_[index]; }
+        ) const noexcept -> const_reference { return this->values[index]; }
 
     private:
         // ── Methods ─────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ namespace collections {
                     "collections::array::at index out of range"
                 );
             }
-            return this->values_[index];
+            return this->values[index];
         }
 
         [[nodiscard]]
@@ -113,7 +113,7 @@ namespace collections {
                     "collections::array::at index out of range"
                 );
             }
-            return this->values_[index];
+            return this->values[index];
         }
 
         [[nodiscard]]
@@ -128,7 +128,7 @@ namespace collections {
                     std::make_error_code(std::errc::result_out_of_range)
                 );
             }
-            return std::reference_wrapper<value_type>(this->values_[index]);
+            return std::reference_wrapper<value_type>(this->values[index]);
         }
 
         [[nodiscard]]
@@ -145,74 +145,74 @@ namespace collections {
             }
 
             return std::reference_wrapper<const value_type>(
-                this->values_[index]
+                this->values[index]
             );
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto front() noexcept -> reference {
-            return this->values_[0];
+            return this->values[0];
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto front() const noexcept -> const_reference {
-            return this->values_[0];
+            return this->values[0];
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto back() noexcept -> reference {
-            return this->values_[this->size() - 1];
+            return this->values[array::size() - 1];
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto back() const noexcept -> const_reference {
-            return this->values_[this->size() - 1];
+            return this->values[array::size() - 1];
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
-        constexpr auto data() noexcept -> pointer { return this->values_; }
+        constexpr auto data() noexcept -> pointer { return this->values; }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto data() const noexcept -> const_pointer {
-            return this->values_;
+            return this->values;
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
-        constexpr auto begin() noexcept -> iterator { return this->values_; }
+        constexpr auto begin() noexcept -> iterator { return this->values; }
 
         [[nodiscard]]
         [[gnu::always_inline]]
-        constexpr auto end() noexcept -> iterator { return this->values_ + N; }
+        constexpr auto end() noexcept -> iterator { return this->values + N; }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto begin() const noexcept -> const_iterator {
-            return this->values_;
+            return this->values;
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto end() const noexcept -> const_iterator {
-            return this->values_ + N;
+            return this->values + N;
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto cbegin() const noexcept -> const_iterator {
-            return this->values_;
+            return this->values;
         }
 
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto cend() const noexcept -> const_iterator {
-            return this->values_ + N;
+            return this->values + N;
         }
 
         [[nodiscard]]
@@ -267,7 +267,7 @@ namespace collections {
             array& other
         ) noexcept (
             noexcept(std::is_nothrow_swappable_v<value_type>)
-        ) { std::swap(this->values_, other.values_); }
+        ) { std::swap(this->values, other.values); }
 
         constexpr void sort() {
             this->_sort(this->begin(), this->end(), std::less<value_type>{});
