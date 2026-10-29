@@ -124,7 +124,9 @@ namespace collections {
             std::error_code
         > {
             if (index >= N) [[unlikely]] {
-                return std::unexpected(std::errc::result_out_of_range);
+                return std::unexpected(
+                    std::make_error_code(std::errc::result_out_of_range)
+                );
             }
             return std::reference_wrapper<value_type>(this->values_[index]);
         }
@@ -137,7 +139,9 @@ namespace collections {
             std::error_code
         > {
             if (index >= N) [[unlikely]] {
-                return std::unexpected(std::errc::result_out_of_range);
+                return std::unexpected(
+                    std::make_error_code(std::errc::result_out_of_range)
+                );
             }
 
             return std::reference_wrapper<const value_type>(
