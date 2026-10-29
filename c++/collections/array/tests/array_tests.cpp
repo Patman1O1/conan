@@ -945,7 +945,7 @@ namespace collections::array_testing {
 
     TEST_F(method_tests, data__points_into_values_field) {
         array values = {1, 2, 3};
-        EXPECT_EQ(values.data(), values.values_);
+        EXPECT_EQ(values.data(), values.values);
     }
 
     TEST_F(method_tests, size) {
