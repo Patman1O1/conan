@@ -5,10 +5,12 @@
 // ISO C++ Includes
 #include <algorithm>
 #include <concepts>
+#include <expected>
 #include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <system_error>
 #include <type_traits>
 #include <utility>
 
@@ -420,6 +422,51 @@ namespace collections::array_testing {
         SUCCEED();
     }
 
+    TEST_F(method_tests, at__mut_overload__valid_indices) {
+        array values = {10, 20, 30};
+
+        EXPECT_EQ(10, values.at(0));
+        EXPECT_EQ(20, values.at(1));
+        EXPECT_EQ(30, values.at(2));
+    }
+
+    TEST_F(method_tests, at__mut_overload__invalid_indices) {
+        array values = {10, 20, 30};
+
+        EXPECT_THROW(
+            static_cast<void>(values.at(static_cast<std::size_t>(-1))),
+            std::out_of_range
+        );
+        EXPECT_THROW(static_cast<void>(values.at(3)), std::out_of_range);
+    }
+
+    TEST_F(method_tests, at__mut_overload__is_mutable) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            values.at(0) = 10;
+            return 10 == values.at(0) &&
+                   2 == values.at(1) &&
+                   3 == values.at(2);
+        }());
+
+        array values = {10, 20, 30};
+
+        values.at(0) = 100;
+        EXPECT_EQ(100, values[0]);
+
+        values.at(2) = 300;
+        EXPECT_EQ(300, values[2]);
+    }
+
+    TEST_F(method_tests, at__mut_overload__matches_subscript) {
+        array values = {10, 20, 30};
+        
+        EXPECT_EQ(values.at(0), values[0]);
+        EXPECT_EQ(values.at(1), values[1]);
+        EXPECT_EQ(values.at(2), values[2]);
+    }
+
+
     TEST_F(method_tests, at__const_overload__returns_const_ref) {
         static_assert(
             std::same_as<
@@ -447,54 +494,193 @@ namespace collections::array_testing {
         SUCCEED();
     }
 
-    TEST_F(method_tests, at__valid_indices) {
-        array values = {10, 20, 30};
-
-        EXPECT_EQ(10, values.at(0));
-        EXPECT_EQ(20, values.at(1));
-        EXPECT_EQ(30, values.at(2));
-    }
-
-    TEST_F(method_tests, at__invalid_indices) {
-        array values = {10, 20, 30};
-
-        EXPECT_THROW(
-            static_cast<void>(values.at(static_cast<std::size_t>(-1))),
-            std::out_of_range
-        );
-        EXPECT_THROW(static_cast<void>(values.at(3)), std::out_of_range);
-    }
-
-    TEST_F(method_tests, at__mut_overload__allows_write) {
-        array values = {10, 20, 30};
-
-        values.at(0) = 100;
-        EXPECT_EQ(100, values[0]);
-
-        values.at(2) = 300;
-        EXPECT_EQ(300, values[2]);
-    }
-
-    TEST_F(method_tests, at__compile_time) {
-        static_assert([] -> bool {
-            array values = {1, 2, 3};
-            values.at(0) = 10;
-            return 10 == values.at(0) &&
-                   2 == values.at(1) &&
-                   3 == values.at(2);
-        }());
-
-        SUCCEED();
-    }
-
-    TEST_F(method_tests, at__matches_subscript) {
+     
+    TEST_F(method_tests, at__const_overload__matches_subscript) {
         constexpr array values = {10, 20, 30};
 
         static_assert(values.at(0) == values[0]);
         static_assert(values.at(1) == values[1]);
         static_assert(values.at(2) == values[2]);
 
+        EXPECT_EQ(values.at(0), values[0]);
+        EXPECT_EQ(values.at(1), values[1]);
+        EXPECT_EQ(values.at(2), values[2]);
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__returns_expected_mut_ref) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().expect_at(0)),
+                std::expected<std::reference_wrapper<int>, std::error_code>
+            >
+        );
+
         SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__is_noexcept) {
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().expect_at(0))
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(
+        method_tests,
+        expect_at__const_overload__returns_expected_const_ref
+    ) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().expect_at(0)),
+                std::expected<
+                    std::reference_wrapper<const int>,
+                    std::error_code
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__const_overload__is_noexcept) {
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().expect_at(0))
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__valid_indices) {
+        array values = {10, 20, 30};
+
+        ASSERT_TRUE(values.expect_at(0).has_value());
+        ASSERT_TRUE(values.expect_at(1).has_value());
+        ASSERT_TRUE(values.expect_at(2).has_value());
+
+        EXPECT_EQ(10, values.expect_at(0)->get());
+        EXPECT_EQ(20, values.expect_at(1)->get());
+        EXPECT_EQ(30, values.expect_at(2)->get());
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__invalid_indices) {
+        array values = {10, 20, 30};
+
+        const auto past_end = values.expect_at(3);
+        ASSERT_FALSE(past_end.has_value());
+        EXPECT_EQ(
+            std::make_error_code(std::errc::result_out_of_range),
+            past_end.error()
+        );
+
+        const auto wrapped = values.expect_at(static_cast<std::size_t>(-1));
+        ASSERT_FALSE(wrapped.has_value());
+        EXPECT_EQ(
+            std::make_error_code(std::errc::result_out_of_range),
+            wrapped.error()
+        );
+    }
+
+    TEST_F(method_tests, expect_at__const_overload__invalid_indices) {
+        const array values = {10, 20, 30};
+
+        const auto past_end = values.expect_at(3);
+        ASSERT_FALSE(past_end.has_value());
+        EXPECT_EQ(
+            std::make_error_code(std::errc::result_out_of_range),
+            past_end.error()
+        );
+
+        const auto wrapped = values.expect_at(static_cast<std::size_t>(-1));
+        ASSERT_FALSE(wrapped.has_value());
+        EXPECT_EQ(
+            std::make_error_code(std::errc::result_out_of_range),
+            wrapped.error()
+        );
+    }
+
+    TEST_F(method_tests, expect_at__invalid_index_does_not_modify) {
+        array values = {10, 20, 30};
+        const auto before = values;
+
+        static_cast<void>(values.expect_at(3));
+        EXPECT_EQ(before, values);
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__allows_write) {
+        array values = {10, 20, 30};
+
+        values.expect_at(0)->get() = 100;
+        EXPECT_EQ(100, values[0]);
+
+        values.expect_at(2).value().get() = 300;
+        EXPECT_EQ(300, values[2]);
+
+        EXPECT_EQ(20, values[1]);
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__aliases_storage) {
+        array values = {10, 20, 30};
+
+        EXPECT_EQ(&values[0], &values.expect_at(0)->get());
+        EXPECT_EQ(&values[1], &values.expect_at(1)->get());
+        EXPECT_EQ(&values[2], &values.expect_at(2)->get());
+    }
+
+    TEST_F(method_tests, expect_at__const_overload__aliases_storage) {
+        constexpr array values = {10, 20, 30};
+
+        EXPECT_EQ(&values[0], &values.expect_at(0)->get());
+        EXPECT_EQ(&values[1], &values.expect_at(1)->get());
+        EXPECT_EQ(&values[2], &values.expect_at(2)->get());
+    }
+
+    TEST_F(method_tests, expect_at__mut_overload__compile_time) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            values.expect_at(0)->get() = 10;
+            return 10 == values.expect_at(0)->get() &&
+                   2 == values.expect_at(1)->get() &&
+                   3 == values.expect_at(2)->get();
+        }());
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__const_overload__compile_time) {
+        constexpr array values = {1, 2, 3};
+
+        static_assert(values.expect_at(0).has_value());
+        static_assert(1 == values.expect_at(0)->get());
+        static_assert(2 == values.expect_at(1)->get());
+        static_assert(3 == values.expect_at(2)->get());
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__matches_at) {
+        constexpr array values = {10, 20, 30};
+
+        static_assert(values.expect_at(0)->get() == values.at(0));
+        static_assert(values.expect_at(1)->get() == values.at(1));
+        static_assert(values.expect_at(2)->get() == values.at(2));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, expect_at__nontrivial) {
+        array<std::string, 3> values = {"This", "is a", "test"};
+
+        ASSERT_TRUE(values.expect_at(1).has_value());
+        EXPECT_EQ("is a", values.expect_at(1)->get());
+        EXPECT_EQ(&values[1], &values.expect_at(1)->get());
+
+        values.expect_at(2)->get() += "ing";
+        EXPECT_EQ("testing", values[2]);
+
+        const auto& const_values = values;
+        EXPECT_EQ(&values[0], &const_values.expect_at(0)->get());
+        EXPECT_FALSE(const_values.expect_at(3).has_value());
     }
 
     TEST_F(method_tests, front__mut_overload__single_element) {
