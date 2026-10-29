@@ -378,7 +378,7 @@ namespace collections::array_testing {
 
         TEST_F(
             operator_tests,
-            subscript_const_overload__does_not_copy_non_trivial
+            subscript_operator__const_overload__does_not_copy_non_trivial
         ) {
             const array values = {
                 std::string("alpha"), std::string("beta")
