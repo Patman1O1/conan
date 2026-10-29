@@ -258,21 +258,135 @@ namespace collections::array_testing {
         EXPECT_TRUE(nontrivial_multiple_lhs >= nontrivial_multiple_rhs);
     }
 
-    TEST_F(operator_tests, subscript_operator__compile_time) {
-        constexpr array arr = {1, 2, 3};
+    TEST_F(operator_tests, subscript_operator__mut_overload__returns_mut_ref) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>()[0]),
+                array<int, 3>::reference
+            >
+            );
 
-        static_assert(arr[0] == 1);
-        static_assert(arr[1] == 2);
-        static_assert(arr[2] == 3);
-    }
+        static_assert(
+            !std::is_const_v<
+                std::remove_reference_t<
+                    decltype(std::declval<array<int, 3>&>()[0])
+                >
+            >
+        );
 
-    TEST(operator_tests, subscript_operator__runtime) {
-        const array<std::string, 3> arr = {"This", "is a", "test"};
+            SUCCEED();
+        }
 
-        EXPECT_EQ(arr[0], "This");
-        EXPECT_EQ(arr[1], "is a");
-        EXPECT_EQ(arr[2], "test");
-    }
+        TEST_F(
+            operator_tests,
+            subscript_operator__mut_overload__is_noexcept
+        ) {
+            static_assert(
+                noexcept(std::declval<array<int, 3>&>()[0])
+            );
+
+            SUCCEED();
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__mut_overload__compile_time
+        ) {
+            static_assert([] -> bool {
+                array values = {1, 2, 3};
+                values[0] = 10;
+                return 10 == values[0] && 2 == values[1] && 3 == values[2];
+            }());
+
+            SUCCEED();
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__mut_overload__aliases_storage
+        ) {
+            array values = {1, 2, 3};
+
+            const int& first  = values[0];
+            int& second = values[1];
+
+            EXPECT_EQ(1, &second - &first);
+
+            second = 20;
+            EXPECT_EQ(20, values[1]);
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__const_overload__returns_const_ref
+        ) {
+            static_assert(
+                std::same_as<
+                    decltype(std::declval<const array<int, 3>&>()[0]),
+                    array<int, 3>::const_reference
+                >
+            );
+
+            static_assert(
+                std::is_const_v<
+                    std::remove_reference_t<
+                        decltype(
+                            std::declval<const array<int, 3>&>()[0]
+                        )
+                    >
+                >
+            );
+
+            SUCCEED();
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__const_overload__is_noexcept
+        ) {
+            static_assert(
+                noexcept(std::declval<const array<int, 3>&>()[0])
+            );
+
+            SUCCEED();
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__const_overload__compile_time
+        ) {
+            constexpr array values = {1, 2, 3};
+
+            static_assert(1 == values[0]);
+            static_assert(2 == values[1]);
+            static_assert(3 == values[2]);
+
+            SUCCEED();
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_operator__const_overload__aliases_storage
+        ) {
+            constexpr array values = {1, 2, 3};
+
+            const int& first  = values[0];
+            const int& second = values[1];
+
+            EXPECT_EQ(1, &second - &first);
+        }
+
+        TEST_F(
+            operator_tests,
+            subscript_const_overload__does_not_copy_non_trivial
+        ) {
+            const array values = {
+                std::string("alpha"), std::string("beta")
+            };
+
+            EXPECT_EQ("alpha", values[0]);
+            EXPECT_EQ(values.data(), values.data());
+        }
     
     // ── Method Tests ────────────────────────────────────────────────────────
     // ── Trait Tests ─────────────────────────────────────────────────────────
