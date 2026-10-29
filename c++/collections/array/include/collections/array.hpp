@@ -42,7 +42,7 @@ namespace collections {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
         // ── Fields ──────────────────────────────────────────────────────────
-        value_type values_[N];
+        value_type values[N];
 
         // ── Overloaded Operators ────────────────────────────────────────────
         [[nodiscard]]
