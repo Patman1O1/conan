@@ -248,74 +248,109 @@ namespace collections {
 
         [[nodiscard]]
         constexpr auto checked_begin() noexcept -> std::optional<iterator> {
-            return N > 0 ? this->values : std::nullopt;
+            if constexpr (N > 0)  {
+                return this->begin();
+            }
+
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_end() noexcept -> std::optional<iterator> {
-            return N > 0 ? this->values + N : std::nullopt;
+            if constexpr (N > 0) {
+                return this->end();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_begin() const noexcept
             -> std::optional<const_iterator> {
-            return N > 0 ? this->values : std::nullopt;
+            if constexpr (N > 0) {
+                return this->begin();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_end() const noexcept
             -> std::optional<const_iterator> {
-            return N > 0 ? this->values + N : std::nullopt;
+            if constexpr (N > 0) {
+                return this->end();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_cbegin() const noexcept
             -> std::optional<const_iterator> {
-            return N > 0 ? this->values : std::nullopt;
+            if constexpr (N > 0) {
+                return this->cbegin();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_cend() const noexcept
             -> std::optional<const_iterator> {
-            return N > 0 ? this->values + N : std::nullopt;
+            if constexpr (N > 0) {
+                return this->cend();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_rbegin() noexcept
             -> std::optional<reverse_iterator> {
-            return N > 0 ? reverse_iterator(this->end()) : std::nullopt;
+            if constexpr (N > 0) {
+                return rbegin();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_rend() noexcept
             -> std::optional<reverse_iterator> {
-            return N > 0 ? reverse_iterator(this->begin()) : std::nullopt;
+            if constexpr (N > 0) {
+                return this->rend();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_rbegin() const noexcept
             -> std::optional<const_reverse_iterator> {
-            return N > 0 ? const_reverse_iterator(this->end()) : std::nullopt;
+            if constexpr (N > 0) {
+                return this->rbegin();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_rend() const noexcept
             -> std::optional<const_reverse_iterator> {
-            return N > 0
-                ? const_reverse_iterator(this->begin())
-                : std::nullopt;
+            if constexpr (N > 0) {
+                return this->rend();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_crbegin() const noexcept
             -> std::optional<const_reverse_iterator> {
-            return N > 0 ? this->rbegin() : std::nullopt;
+            if constexpr (N > 0) {
+                return this->crbegin();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
         constexpr auto checked_crend() const noexcept
             -> std::optional<const_reverse_iterator> {
-            return N > 0 ? this->rend() : std::nullopt;
+            if constexpr (N > 0) {
+                return this->crend();
+            }
+            return std::nullopt;
         }
 
         [[nodiscard]]
