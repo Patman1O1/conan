@@ -11,6 +11,7 @@
 #include <expected>
 #include <functional>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 
@@ -243,6 +244,78 @@ namespace collections {
         [[nodiscard]]
         constexpr auto crend() const noexcept -> const_reverse_iterator {
             return this->rend();
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_begin() noexcept -> std::optional<iterator> {
+            return N > 0 ? this->values : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_end() noexcept -> std::optional<iterator> {
+            return N > 0 ? this->values + N : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_begin() const noexcept
+            -> std::optional<const_iterator> {
+            return N > 0 ? this->values : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_end() const noexcept
+            -> std::optional<const_iterator> {
+            return N > 0 ? this->values + N : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_cbegin() const noexcept
+            -> std::optional<const_iterator> {
+            return N > 0 ? this->values : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_cend() const noexcept
+            -> std::optional<const_iterator> {
+            return N > 0 ? this->values + N : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_rbegin() noexcept
+            -> std::optional<reverse_iterator> {
+            return N > 0 ? reverse_iterator(this->end()) : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_rend() noexcept
+            -> std::optional<reverse_iterator> {
+            return N > 0 ? reverse_iterator(this->begin()) : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_rbegin() const noexcept
+            -> std::optional<const_reverse_iterator> {
+            return N > 0 ? const_reverse_iterator(this->end()) : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_rend() const noexcept
+            -> std::optional<const_reverse_iterator> {
+            return N > 0
+                ? const_reverse_iterator(this->begin())
+                : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_crbegin() const noexcept
+            -> std::optional<const_reverse_iterator> {
+            return N > 0 ? this->rbegin() : std::nullopt;
+        }
+
+        [[nodiscard]]
+        constexpr auto checked_crend() const noexcept
+            -> std::optional<const_reverse_iterator> {
+            return N > 0 ? this->rend() : std::nullopt;
         }
 
         [[nodiscard]]
