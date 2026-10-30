@@ -7,7 +7,9 @@
 #include <concepts>
 #include <expected>
 #include <functional>
+#include <iterator>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <system_error>
@@ -36,6 +38,8 @@ namespace collections::array_testing {
         class method_tests : public testing::Test {};
 
         class trait_tests : public testing::Test {};
+
+        class iterator_tests : public testing::Test {};
     } // namespace
 
     // ── Operator Tests ──────────────────────────────────────────────────────
@@ -460,7 +464,7 @@ namespace collections::array_testing {
 
     TEST_F(method_tests, at__mut_overload__matches_subscript) {
         array values = {10, 20, 30};
-        
+
         EXPECT_EQ(values.at(0), values[0]);
         EXPECT_EQ(values.at(1), values[1]);
         EXPECT_EQ(values.at(2), values[2]);
@@ -494,7 +498,7 @@ namespace collections::array_testing {
         SUCCEED();
     }
 
-     
+
     TEST_F(method_tests, at__const_overload__matches_subscript) {
         constexpr array values = {10, 20, 30};
 
@@ -605,7 +609,7 @@ namespace collections::array_testing {
                 array<int, 3>::const_reference
             >
         );
- 
+
         static_assert(
             std::is_const_v<
                 std::remove_reference_t<
@@ -687,7 +691,7 @@ namespace collections::array_testing {
         EXPECT_EQ(&values[1], &values.expect_at(1)->get());
         EXPECT_EQ(&values[2], &values.expect_at(2)->get());
     }
-    
+
     TEST_F(method_tests, front__mut_overload__single_element) {
         static_assert(
             std::same_as<
@@ -965,6 +969,982 @@ namespace collections::array_testing {
         );
 
         SUCCEED();
+    }
+
+    // ── begin() ─────────────────────────────────────────────────────────────
+    TEST_F(method_tests, begin__mut_overload__returns_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().begin()),
+                array<int, 3>::iterator
+            >
+        );
+
+        static_assert(
+            !std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<array<int, 3>&>().begin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, begin__mut_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().begin()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, begin__mut_overload__points_to_first_element) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            return values.data() == values.begin() &&
+                   &values.front() == values.begin() &&
+                   1 == *values.begin();
+        }());
+
+        // Single Element
+        array single = {1};
+        EXPECT_EQ(single.data(), single.begin());
+        EXPECT_EQ(&single.front(), single.begin());
+        EXPECT_EQ(1, *single.begin());
+
+        // Multiple Elements
+        array multiple = {1, 2, 3};
+        EXPECT_EQ(multiple.data(), multiple.begin());
+        EXPECT_EQ(&multiple.front(), multiple.begin());
+        EXPECT_EQ(1, *multiple.begin());
+    }
+
+    TEST_F(method_tests, begin__mut_overload__is_mutable) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            *values.begin() = 10;
+            return 10 == values[0] && 2 == values[1] && 3 == values[2];
+        }());
+
+        array values = {1, 2, 3};
+        *values.begin() = 10;
+        EXPECT_EQ(10, values[0]);
+        EXPECT_EQ(2,  values[1]);
+        EXPECT_EQ(3,  values[2]);
+    }
+
+    TEST_F(method_tests, begin__mut_overload__nontrivial) {
+        array<std::string, 3> values = {"This", "is a", "test"};
+
+        EXPECT_EQ("This", *values.begin());
+        EXPECT_EQ(4u, values.begin()->size());
+
+        *values.begin() = "That";
+        EXPECT_EQ("That", values[0]);
+        EXPECT_EQ("is a", values[1]);
+        EXPECT_EQ("test", values[2]);
+    }
+
+    TEST_F(method_tests, begin__const_overload__returns_const_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().begin()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        static_assert(
+            std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<const array<int, 3>&>().begin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, begin__const_overload__is_noexcept) {
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().begin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, begin__const_overload__points_to_first_element) {
+        // Single Element
+        constexpr array single = {1};
+        static_assert(single.data() == single.begin());
+        static_assert(1 == *single.begin());
+
+        EXPECT_EQ(single.data(), single.begin());
+        EXPECT_EQ(&single.front(), single.begin());
+
+        // Multiple Elements
+        constexpr array multiple = {1, 2, 3};
+        static_assert(multiple.data() == multiple.begin());
+        static_assert(1 == *multiple.begin());
+
+        EXPECT_EQ(multiple.data(), multiple.begin());
+        EXPECT_EQ(&multiple.front(), multiple.begin());
+    }
+
+    // ── end() ───────────────────────────────────────────────────────────────
+    TEST_F(method_tests, end__mut_overload__returns_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().end()),
+                array<int, 3>::iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, end__mut_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().end()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, end__mut_overload__points_one_past_last_element) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            return values.data() + 3 == values.end() &&
+                   &values.back() + 1 == values.end() &&
+                   3 == values.end() - values.begin();
+        }());
+
+        // Single Element
+        array single = {1};
+        EXPECT_EQ(single.data() + 1, single.end());
+        EXPECT_EQ(&single.back() + 1, single.end());
+        EXPECT_EQ(1, single.end() - single.begin());
+
+        // Multiple Elements
+        array multiple = {1, 2, 3};
+        EXPECT_EQ(multiple.data() + 3, multiple.end());
+        EXPECT_EQ(&multiple.back() + 1, multiple.end());
+        EXPECT_EQ(3, multiple.end() - multiple.begin());
+    }
+
+    TEST_F(method_tests, end__mut_overload__is_mutable) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            *(values.end() - 1) = 30;
+            return 1 == values[0] && 2 == values[1] && 30 == values[2];
+        }());
+
+        array values = {1, 2, 3};
+        *(values.end() - 1) = 30;
+        EXPECT_EQ(1,  values[0]);
+        EXPECT_EQ(2,  values[1]);
+        EXPECT_EQ(30, values[2]);
+    }
+
+    TEST_F(method_tests, end__mut_overload__bounds_full_traversal) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            for (auto it = values.begin(); it != values.end(); ++it) {
+                *it *= 10;
+            }
+            return 10 == values[0] && 20 == values[1] && 30 == values[2];
+        }());
+
+        array values = {1, 2, 3};
+        std::size_t visited = 0;
+        for (auto it = values.begin(); it != values.end(); ++it) {
+            EXPECT_EQ(&values[visited], it);
+            ++visited;
+        }
+        EXPECT_EQ(values.size(), visited);
+    }
+
+    TEST_F(method_tests, end__const_overload__returns_const_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().end()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, end__const_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<const array<int, 3>&>().end()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, end__const_overload__points_one_past_last_element) {
+        // Single Element
+        constexpr array single = {1};
+        static_assert(single.data() + 1 == single.end());
+        static_assert(1 == single.end() - single.begin());
+
+        EXPECT_EQ(&single.back() + 1, single.end());
+
+        // Multiple Elements
+        constexpr array multiple = {1, 2, 3};
+        static_assert(multiple.data() + 3 == multiple.end());
+        static_assert(3 == multiple.end() - multiple.begin());
+        static_assert(3 == *(multiple.end() - 1));
+
+        EXPECT_EQ(&multiple.back() + 1, multiple.end());
+        EXPECT_EQ(3, *(multiple.end() - 1));
+    }
+
+    // ── cbegin() / cend() ───────────────────────────────────────────────────
+    TEST_F(method_tests, cbegin__returns_const_iterator) {
+        // Must yield a const_iterator even when called on a mutable array.
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().cbegin()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().cbegin()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        static_assert(
+            std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<array<int, 3>&>().cbegin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, cbegin__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().cbegin()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, cbegin__matches_begin) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.begin() == values.cbegin());
+        static_assert(1 == *values.cbegin());
+
+        array mutable_values = {1, 2, 3};
+        EXPECT_EQ(mutable_values.begin(), mutable_values.cbegin());
+        EXPECT_EQ(mutable_values.data(), mutable_values.cbegin());
+    }
+
+    TEST_F(method_tests, cend__returns_const_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().cend()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().cend()),
+                array<int, 3>::const_iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, cend__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().cend()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, cend__matches_end) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.end() == values.cend());
+        static_assert(3 == values.cend() - values.cbegin());
+
+        array mutable_values = {1, 2, 3};
+        EXPECT_EQ(mutable_values.end(), mutable_values.cend());
+        EXPECT_EQ(mutable_values.data() + 3, mutable_values.cend());
+    }
+
+    // ── rbegin() / rend() ───────────────────────────────────────────────────
+    TEST_F(method_tests, rbegin__mut_overload__returns_reverse_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().rbegin()),
+                array<int, 3>::reverse_iterator
+            >
+        );
+
+        static_assert(
+            !std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<array<int, 3>&>().rbegin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rbegin__mut_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().rbegin()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rbegin__mut_overload__points_to_last_element) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            return values.end() == values.rbegin().base() &&
+                   &values.back() == &*values.rbegin() &&
+                   3 == *values.rbegin();
+        }());
+
+        // Single Element
+        array single = {1};
+        EXPECT_EQ(single.end(), single.rbegin().base());
+        EXPECT_EQ(&single.back(), &*single.rbegin());
+        EXPECT_EQ(&single.front(), &*single.rbegin());
+
+        // Multiple Elements
+        array multiple = {1, 2, 3};
+        EXPECT_EQ(multiple.end(), multiple.rbegin().base());
+        EXPECT_EQ(&multiple.back(), &*multiple.rbegin());
+        EXPECT_EQ(3, *multiple.rbegin());
+    }
+
+    TEST_F(method_tests, rbegin__mut_overload__is_mutable) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            *values.rbegin() = 30;
+            return 1 == values[0] && 2 == values[1] && 30 == values[2];
+        }());
+
+        array values = {1, 2, 3};
+        *values.rbegin() = 30;
+        EXPECT_EQ(1,  values[0]);
+        EXPECT_EQ(2,  values[1]);
+        EXPECT_EQ(30, values[2]);
+    }
+
+    TEST_F(method_tests, rend__mut_overload__returns_reverse_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().rend()),
+                array<int, 3>::reverse_iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rend__mut_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().rend()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rend__mut_overload__points_one_before_first_element) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            return values.begin() == values.rend().base() &&
+                   &values.front() == &*(values.rend() - 1) &&
+                   3 == values.rend() - values.rbegin();
+        }());
+
+        // Single Element
+        array single = {1};
+        EXPECT_EQ(single.begin(), single.rend().base());
+        EXPECT_EQ(1, single.rend() - single.rbegin());
+
+        // Multiple Elements
+        array multiple = {1, 2, 3};
+        EXPECT_EQ(multiple.begin(), multiple.rend().base());
+        EXPECT_EQ(&multiple.front(), &*(multiple.rend() - 1));
+        EXPECT_EQ(3, multiple.rend() - multiple.rbegin());
+    }
+
+    TEST_F(method_tests, rbegin_rend__mut_overload__traverse_in_reverse) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            int expected = 3;
+            for (auto it = values.rbegin(); it != values.rend(); ++it) {
+                if (*it != expected--) {
+                    return false;
+                }
+            }
+            return 0 == expected;
+        }());
+
+        array values = {1, 2, 3};
+        constexpr array reversed = {3, 2, 1};
+        EXPECT_TRUE(
+            std::equal(values.rbegin(), values.rend(), reversed.begin())
+        );
+
+        std::fill(values.rbegin(), values.rbegin() + 2, 0);
+        EXPECT_EQ(1, values[0]);
+        EXPECT_EQ(0, values[1]);
+        EXPECT_EQ(0, values[2]);
+    }
+
+    TEST_F(
+        method_tests,
+        rbegin__const_overload__returns_const_reverse_iterator
+    ) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().rbegin()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        static_assert(
+            std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<const array<int, 3>&>().rbegin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rbegin__const_overload__is_noexcept) {
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().rbegin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rbegin__const_overload__points_to_last_element) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.end() == values.rbegin().base());
+        static_assert(3 == *values.rbegin());
+        static_assert(&values.back() == &*values.rbegin());
+
+        EXPECT_EQ(values.end(), values.rbegin().base());
+        EXPECT_EQ(&values.back(), &*values.rbegin());
+    }
+
+    TEST_F(
+        method_tests,
+        rend__const_overload__returns_const_reverse_iterator
+    ) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().rend()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, rend__const_overload__is_noexcept) {
+        static_assert(noexcept(std::declval<const array<int, 3>&>().rend()));
+
+        SUCCEED();
+    }
+
+    TEST_F(
+        method_tests,
+        rend__const_overload__points_one_before_first_element
+    ) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.begin() == values.rend().base());
+        static_assert(1 == *(values.rend() - 1));
+        static_assert(3 == values.rend() - values.rbegin());
+
+        EXPECT_EQ(values.begin(), values.rend().base());
+        EXPECT_EQ(&values.front(), &*(values.rend() - 1));
+    }
+
+    TEST_F(method_tests, rbegin_rend__const_overload__traverse_in_reverse) {
+        constexpr array values = {1, 2, 3};
+        constexpr array reversed = {3, 2, 1};
+
+        static_assert(
+            std::equal(values.rbegin(), values.rend(), reversed.begin())
+        );
+        EXPECT_TRUE(
+            std::equal(values.rbegin(), values.rend(), reversed.begin())
+        );
+    }
+
+    // ── crbegin() / crend() ─────────────────────────────────────────────────
+    TEST_F(method_tests, crbegin__returns_const_reverse_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().crbegin()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().crbegin()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        static_assert(
+            std::is_const_v<
+                std::remove_reference_t<
+                    decltype(*std::declval<array<int, 3>&>().crbegin())
+                >
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, crbegin__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().crbegin()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, crbegin__matches_rbegin) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.rbegin() == values.crbegin());
+        static_assert(values.cend() == values.crbegin().base());
+        static_assert(3 == *values.crbegin());
+
+        array mutable_values = {1, 2, 3};
+        EXPECT_EQ(mutable_values.cend(), mutable_values.crbegin().base());
+        EXPECT_EQ(&mutable_values.back(), &*mutable_values.crbegin());
+    }
+
+    TEST_F(method_tests, crend__returns_const_reverse_iterator) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().crend()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().crend()),
+                array<int, 3>::const_reverse_iterator
+            >
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, crend__is_noexcept) {
+        static_assert(noexcept(std::declval<array<int, 3>&>().crend()));
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, crend__matches_rend) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.rend() == values.crend());
+        static_assert(values.cbegin() == values.crend().base());
+        static_assert(3 == values.crend() - values.crbegin());
+
+        array mutable_values = {1, 2, 3};
+        EXPECT_EQ(mutable_values.cbegin(), mutable_values.crend().base());
+        EXPECT_EQ(3, mutable_values.crend() - mutable_values.crbegin());
+    }
+
+    // ── checked_begin() / checked_end() ─────────────────────────────────────
+    TEST_F(method_tests, checked_begin__mut_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_begin()),
+                std::optional<array<int, 3>::iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_begin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_begin__mut_overload__non_empty) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            const auto it = values.checked_begin();
+            return it.has_value() && values.begin() == *it;
+        }());
+
+        array values = {1, 2, 3};
+        const auto it = values.checked_begin();
+        ASSERT_TRUE(it.has_value());
+        EXPECT_EQ(values.begin(), *it);
+
+        **it = 10;
+        EXPECT_EQ(10, values[0]);
+    }
+
+    TEST_F(method_tests, checked_begin__mut_overload__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_begin().has_value());
+    }
+
+    TEST_F(method_tests, checked_begin__const_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(
+                    std::declval<const array<int, 3>&>().checked_begin()
+                ),
+                std::optional<array<int, 3>::const_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().checked_begin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_begin__const_overload__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_begin().has_value());
+        static_assert(values.begin() == *values.checked_begin());
+
+        ASSERT_TRUE(values.checked_begin().has_value());
+        EXPECT_EQ(values.begin(), *values.checked_begin());
+    }
+
+    TEST_F(method_tests, checked_begin__const_overload__empty) {
+        const array<int, 0> values{};
+        EXPECT_FALSE(values.checked_begin().has_value());
+    }
+
+    TEST_F(method_tests, checked_end__mut_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_end()),
+                std::optional<array<int, 3>::iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_end())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_end__mut_overload__non_empty) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            const auto it = values.checked_end();
+            return it.has_value() && values.end() == *it;
+        }());
+
+        array values = {1, 2, 3};
+        const auto it = values.checked_end();
+        ASSERT_TRUE(it.has_value());
+        EXPECT_EQ(values.end(), *it);
+    }
+
+    TEST_F(method_tests, checked_end__mut_overload__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_end().has_value());
+    }
+
+    TEST_F(method_tests, checked_end__const_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<const array<int, 3>&>().checked_end()),
+                std::optional<array<int, 3>::const_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().checked_end())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_end__const_overload__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_end().has_value());
+        static_assert(values.end() == *values.checked_end());
+
+        ASSERT_TRUE(values.checked_end().has_value());
+        EXPECT_EQ(values.end(), *values.checked_end());
+    }
+
+    TEST_F(method_tests, checked_end__const_overload__empty) {
+        constexpr array<int, 0> values{};
+        EXPECT_FALSE(values.checked_end().has_value());
+    }
+
+    // ── checked_cbegin() / checked_cend() ───────────────────────────────────
+    TEST_F(method_tests, checked_cbegin__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_cbegin()),
+                std::optional<array<int, 3>::const_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_cbegin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_cbegin__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_cbegin().has_value());
+        static_assert(values.cbegin() == *values.checked_cbegin());
+
+        array mutable_values = {1, 2, 3};
+        ASSERT_TRUE(mutable_values.checked_cbegin().has_value());
+        EXPECT_EQ(mutable_values.cbegin(), *mutable_values.checked_cbegin());
+    }
+
+    TEST_F(method_tests, checked_cbegin__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_cbegin().has_value());
+    }
+
+    TEST_F(method_tests, checked_cend__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_cend()),
+                std::optional<array<int, 3>::const_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_cend())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_cend__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_cend().has_value());
+        static_assert(values.cend() == *values.checked_cend());
+
+        array mutable_values = {1, 2, 3};
+        ASSERT_TRUE(mutable_values.checked_cend().has_value());
+        EXPECT_EQ(mutable_values.cend(), *mutable_values.checked_cend());
+    }
+
+    TEST_F(method_tests, checked_cend__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_cend().has_value());
+    }
+
+    // ── checked_rbegin() / checked_rend() ───────────────────────────────────
+    TEST_F(method_tests, checked_rbegin__mut_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_rbegin()),
+                std::optional<array<int, 3>::reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_rbegin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_rbegin__mut_overload__non_empty) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            const auto it = values.checked_rbegin();
+            return it.has_value() && values.rbegin() == *it && 3 == **it;
+        }());
+
+        array values = {1, 2, 3};
+        const auto it = values.checked_rbegin();
+        ASSERT_TRUE(it.has_value());
+        EXPECT_EQ(values.rbegin(), *it);
+
+        **it = 30;
+        EXPECT_EQ(30, values[2]);
+    }
+
+    TEST_F(method_tests, checked_rbegin__mut_overload__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_rbegin().has_value());
+    }
+
+    TEST_F(method_tests, checked_rbegin__const_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(
+                    std::declval<const array<int, 3>&>().checked_rbegin()
+                ),
+                std::optional<array<int, 3>::const_reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().checked_rbegin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_rbegin__const_overload__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_rbegin().has_value());
+        static_assert(values.rbegin() == *values.checked_rbegin());
+        static_assert(3 == **values.checked_rbegin());
+
+        ASSERT_TRUE(values.checked_rbegin().has_value());
+        EXPECT_EQ(values.rbegin(), *values.checked_rbegin());
+    }
+
+    TEST_F(method_tests, checked_rbegin__const_overload__empty) {
+        const array<int, 0> values{};
+        EXPECT_FALSE(values.checked_rbegin().has_value());
+    }
+
+    TEST_F(method_tests, checked_rend__mut_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_rend()),
+                std::optional<array<int, 3>::reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_rend())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_rend__mut_overload__non_empty) {
+        static_assert([] -> bool {
+            array values = {1, 2, 3};
+            const auto it = values.checked_rend();
+            return it.has_value() && values.rend() == *it;
+        }());
+
+        array values = {1, 2, 3};
+        const auto it = values.checked_rend();
+        ASSERT_TRUE(it.has_value());
+        EXPECT_EQ(values.rend(), *it);
+    }
+
+    TEST_F(method_tests, checked_rend__mut_overload__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_rend().has_value());
+    }
+
+    TEST_F(method_tests, checked_rend__const_overload__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(
+                    std::declval<const array<int, 3>&>().checked_rend()
+                ),
+                std::optional<array<int, 3>::const_reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<const array<int, 3>&>().checked_rend())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_rend__const_overload__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_rend().has_value());
+        static_assert(values.rend() == *values.checked_rend());
+
+        ASSERT_TRUE(values.checked_rend().has_value());
+        EXPECT_EQ(values.rend(), *values.checked_rend());
+    }
+
+    TEST_F(method_tests, checked_rend__const_overload__empty) {
+        const array<int, 0> values{};
+        EXPECT_FALSE(values.checked_rend().has_value());
+    }
+
+    // ── checked_crbegin() / checked_crend() ─────────────────────────────────
+    TEST_F(method_tests, checked_crbegin__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_crbegin()),
+                std::optional<array<int, 3>::const_reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_crbegin())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_crbegin__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_crbegin().has_value());
+        static_assert(values.crbegin() == *values.checked_crbegin());
+
+        array mutable_values = {1, 2, 3};
+        ASSERT_TRUE(mutable_values.checked_crbegin().has_value());
+        EXPECT_EQ(
+            mutable_values.crbegin(),
+            *mutable_values.checked_crbegin()
+        );
+    }
+
+    TEST_F(method_tests, checked_crbegin__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_crbegin().has_value());
+    }
+
+    TEST_F(method_tests, checked_crend__returns_optional) {
+        static_assert(
+            std::same_as<
+                decltype(std::declval<array<int, 3>&>().checked_crend()),
+                std::optional<array<int, 3>::const_reverse_iterator>
+            >
+        );
+
+        static_assert(
+            noexcept(std::declval<array<int, 3>&>().checked_crend())
+        );
+
+        SUCCEED();
+    }
+
+    TEST_F(method_tests, checked_crend__non_empty) {
+        constexpr array values = {1, 2, 3};
+        static_assert(values.checked_crend().has_value());
+        static_assert(values.crend() == *values.checked_crend());
+
+        array mutable_values = {1, 2, 3};
+        ASSERT_TRUE(mutable_values.checked_crend().has_value());
+        EXPECT_EQ(mutable_values.crend(), *mutable_values.checked_crend());
+    }
+
+    TEST_F(method_tests, checked_crend__empty) {
+        array<int, 0> values{};
+        EXPECT_FALSE(values.checked_crend().has_value());
     }
 
     TEST_F(method_tests, max_size) {
