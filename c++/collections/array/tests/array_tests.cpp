@@ -972,7 +972,6 @@ namespace collections::array_testing {
             SUCCEED();
         }
 
-        // ── begin() ─────────────────────────────────────────────────────────────
         TEST_F(method_tests, begin__mut_overload__returns_iterator) {
             static_assert(
                 std::same_as<
@@ -1196,7 +1195,6 @@ namespace collections::array_testing {
             EXPECT_EQ(3, *(multiple.end() - 1));
         }
 
-        // ── cbegin() / cend() ───────────────────────────────────────────────────
         TEST_F(method_tests, cbegin__returns_const_iterator) {
             // Must yield a const_iterator even when called on a mutable array.
             static_assert(
@@ -1274,7 +1272,6 @@ namespace collections::array_testing {
             EXPECT_EQ(mutable_values.data() + 3, mutable_values.cend());
         }
 
-        // ── rbegin() / rend() ───────────────────────────────────────────────────
         TEST_F(method_tests, rbegin__mut_overload__returns_reverse_iterator) {
             static_assert(
                 std::same_as<
@@ -1560,7 +1557,6 @@ namespace collections::array_testing {
             EXPECT_EQ(3, mutable_values.crend() - mutable_values.crbegin());
         }
 
-        // ── checked_begin() / checked_end() ─────────────────────────────────────
         TEST_F(method_tests, checked_begin__mut_overload__returns_optional) {
             static_assert(
                 std::same_as<
@@ -1690,7 +1686,6 @@ namespace collections::array_testing {
             EXPECT_FALSE(values.checked_end().has_value());
         }
 
-        // ── checked_cbegin() / checked_cend() ───────────────────────────────────
         TEST_F(method_tests, checked_cbegin__returns_optional) {
             static_assert(
                 std::same_as<
@@ -1753,7 +1748,6 @@ namespace collections::array_testing {
             EXPECT_FALSE(values.checked_cend().has_value());
         }
 
-        // ── checked_rbegin() / checked_rend() ───────────────────────────────────
         TEST_F(method_tests, checked_rbegin__mut_overload__returns_optional) {
             static_assert(
                 std::same_as<
