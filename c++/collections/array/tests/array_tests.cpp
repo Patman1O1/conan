@@ -38,8 +38,6 @@ namespace collections::array_testing {
         class method_tests : public testing::Test {};
 
         class trait_tests : public testing::Test {};
-
-        class iterator_tests : public testing::Test {};
     } // namespace
 
     // ── Operator Tests ──────────────────────────────────────────────────────
