@@ -78,8 +78,12 @@ namespace collections::array_testing {
             EXPECT_TRUE(trivial_multiple_lhs == trivial_multiple_rhs);
 
             // Nontrivial Single Element
-            const array<std::string, 1> nontrivial_single_lhs = {"This is a test"};
-            const array<std::string, 1> nontrivial_single_rhs = {"This is a test"};
+            const array<std::string, 1> nontrivial_single_lhs = {
+                "This is a test"
+            };
+            const array<std::string, 1> nontrivial_single_rhs = {
+                "This is a test"
+            };
             EXPECT_TRUE(nontrivial_single_lhs == nontrivial_single_rhs);
 
             // Nontrivial Multiple Elements
@@ -106,7 +110,9 @@ namespace collections::array_testing {
             EXPECT_FALSE(trivial_multiple_lhs == trivial_multiple_rhs);
 
             // Nontrivial Single Element
-            const array<std::string, 1> nontrivial_single_lhs = {"This is a test"};
+            const array<std::string, 1> nontrivial_single_lhs = {
+                "This is a test"
+            };
             const array<std::string, 1> nontrivial_single_rhs = {
                 "This is a different test"
             };
@@ -140,15 +146,23 @@ namespace collections::array_testing {
             static_assert(trivial_multiple_lhs != trivial_multiple_first_rhs);
             static_assert(trivial_multiple_lhs != trivial_multiple_middle_rhs);
             static_assert(trivial_multiple_lhs != trivial_multiple_last_rhs);
-            static_assert(!(trivial_multiple_lhs == trivial_multiple_first_rhs));
-            static_assert(!(trivial_multiple_lhs == trivial_multiple_middle_rhs));
-            static_assert(!(trivial_multiple_lhs == trivial_multiple_last_rhs));
+            static_assert(
+                !(trivial_multiple_lhs == trivial_multiple_first_rhs)
+            );
+            static_assert(
+                !(trivial_multiple_lhs == trivial_multiple_middle_rhs)
+            );
+            static_assert(
+                !(trivial_multiple_lhs == trivial_multiple_last_rhs)
+            );
 
             EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_first_rhs);
             EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_middle_rhs);
             EXPECT_TRUE(trivial_multiple_lhs != trivial_multiple_last_rhs);
             EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_first_rhs));
-            EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_middle_rhs));
+            EXPECT_TRUE(
+                !(trivial_multiple_lhs == trivial_multiple_middle_rhs)
+            );
             EXPECT_TRUE(!(trivial_multiple_lhs == trivial_multiple_last_rhs));
 
             // Nontrivial Multiple Elements
@@ -193,7 +207,9 @@ namespace collections::array_testing {
             static_assert(
                 trivial_lexicographic_lhs <=> trivial_lexicographic_rhs < 0
             );
-            static_assert(trivial_lexicographic_lhs < trivial_lexicographic_rhs);
+            static_assert(
+                trivial_lexicographic_lhs < trivial_lexicographic_rhs
+            );
 
             EXPECT_TRUE(
                 trivial_lexicographic_lhs <=> trivial_lexicographic_rhs < 0
@@ -208,7 +224,9 @@ namespace collections::array_testing {
                 "This", "is a", "text"
             };
 
-            EXPECT_TRUE(nontrivial_multiple_lhs <=> nontrivial_multiple_rhs < 0);
+            EXPECT_TRUE(
+                nontrivial_multiple_lhs <=> nontrivial_multiple_rhs < 0
+            );
             EXPECT_TRUE(nontrivial_multiple_lhs < nontrivial_multiple_rhs);
             EXPECT_TRUE(!(nontrivial_multiple_lhs > nontrivial_multiple_rhs));
             EXPECT_TRUE(nontrivial_multiple_lhs <= nontrivial_multiple_rhs);
@@ -260,14 +278,19 @@ namespace collections::array_testing {
                 "This", "is a", "test"
             };
 
-            EXPECT_TRUE(nontrivial_multiple_lhs <=> nontrivial_multiple_rhs > 0);
+            EXPECT_TRUE(
+                nontrivial_multiple_lhs <=> nontrivial_multiple_rhs > 0
+            );
             EXPECT_TRUE(!(nontrivial_multiple_lhs < nontrivial_multiple_rhs));
             EXPECT_TRUE(nontrivial_multiple_lhs > nontrivial_multiple_rhs);
             EXPECT_TRUE(!(nontrivial_multiple_lhs <= nontrivial_multiple_rhs));
             EXPECT_TRUE(nontrivial_multiple_lhs >= nontrivial_multiple_rhs);
         }
 
-        TEST_F(operator_tests, subscript_operator__mut_overload__returns_mut_ref) {
+        TEST_F(
+            operator_tests,
+            subscript_operator__mut_overload__returns_mut_ref
+        ) {
             static_assert(
                 std::same_as<
                     decltype(std::declval<array<int, 3>&>()[0]),
@@ -512,7 +535,10 @@ namespace collections::array_testing {
             EXPECT_EQ(values.at(2), values[2]);
         }
 
-        TEST_F(method_tests, expect_at__mut_overload__returns_expected_mut_ref) {
+        TEST_F(
+            method_tests,
+            expect_at__mut_overload__returns_expected_mut_ref
+        ) {
             static_assert(
                 std::same_as<
                     decltype(std::declval<array<int, 3>&>().expect_at(0)),
@@ -553,7 +579,9 @@ namespace collections::array_testing {
                 past_end.error()
             );
 
-            const auto wrapped = values.expect_at(static_cast<std::size_t>(-1));
+            const auto wrapped = values.expect_at(
+                static_cast<std::size_t>(-1)
+            );
             ASSERT_FALSE(wrapped.has_value());
             EXPECT_EQ(
                 std::make_error_code(std::errc::result_out_of_range),
@@ -660,7 +688,9 @@ namespace collections::array_testing {
                 past_end.error()
             );
 
-            const auto wrapped = values.expect_at(static_cast<std::size_t>(-1));
+            const auto wrapped = values.expect_at(
+                static_cast<std::size_t>(-1)
+            );
             ASSERT_FALSE(wrapped.has_value());
             EXPECT_EQ(
                 std::make_error_code(std::errc::result_out_of_range),
@@ -874,7 +904,9 @@ namespace collections::array_testing {
                 >
             );
 
-            static_assert(noexcept(std::declval<const array<int, 1>&>().back()));
+            static_assert(
+                noexcept(std::declval<const array<int, 1>&>().back())
+            );
 
             constexpr array values = {1};
             static_assert(1 == values.back());
@@ -1089,7 +1121,6 @@ namespace collections::array_testing {
             EXPECT_EQ(&multiple.front(), multiple.begin());
         }
 
-        // ── end() ───────────────────────────────────────────────────────────────
         TEST_F(method_tests, end__mut_overload__returns_iterator) {
             static_assert(
                 std::same_as<
@@ -1172,12 +1203,17 @@ namespace collections::array_testing {
         }
 
         TEST_F(method_tests, end__const_overload__is_noexcept) {
-            static_assert(noexcept(std::declval<const array<int, 3>&>().end()));
+            static_assert(
+                noexcept(std::declval<const array<int, 3>&>().end())
+            );
 
             SUCCEED();
         }
 
-        TEST_F(method_tests, end__const_overload__points_one_past_last_element) {
+        TEST_F(
+            method_tests,
+            end__const_overload__points_one_past_last_element
+        ) {
             // Single Element
             constexpr array single = {1};
             static_assert(single.data() + 1 == single.end());
@@ -1349,7 +1385,10 @@ namespace collections::array_testing {
             SUCCEED();
         }
 
-        TEST_F(method_tests, rend__mut_overload__points_one_before_first_element) {
+        TEST_F(
+            method_tests,
+            rend__mut_overload__points_one_before_first_element
+        ) {
             static_assert([] -> bool {
                 array values = {1, 2, 3};
                 return values.begin() == values.rend().base() &&
@@ -1387,7 +1426,7 @@ namespace collections::array_testing {
                 std::equal(values.rbegin(), values.rend(), reversed.begin())
             );
 
-            std::fill(values.rbegin(), values.rbegin() + 2, 0);
+            std::fill_n(values.rbegin(), 2, 0);
             EXPECT_EQ(1, values[0]);
             EXPECT_EQ(0, values[1]);
             EXPECT_EQ(0, values[2]);
@@ -1407,7 +1446,9 @@ namespace collections::array_testing {
             static_assert(
                 std::is_const_v<
                     std::remove_reference_t<
-                        decltype(*std::declval<const array<int, 3>&>().rbegin())
+                        decltype(
+                            *std::declval<const array<int, 3>&>().rbegin()
+                        )
                     >
                 >
             );
@@ -1448,7 +1489,9 @@ namespace collections::array_testing {
         }
 
         TEST_F(method_tests, rend__const_overload__is_noexcept) {
-            static_assert(noexcept(std::declval<const array<int, 3>&>().rend()));
+            static_assert(
+                noexcept(std::declval<const array<int, 3>&>().rend())
+            );
 
             SUCCEED();
         }
@@ -1466,7 +1509,10 @@ namespace collections::array_testing {
             EXPECT_EQ(&values.front(), &*(values.rend() - 1));
         }
 
-        TEST_F(method_tests, rbegin_rend__const_overload__traverse_in_reverse) {
+        TEST_F(
+            method_tests,
+            rbegin_rend__const_overload__traverse_in_reverse
+        ) {
             constexpr array values = {1, 2, 3};
             constexpr array reversed = {3, 2, 1};
 
@@ -1478,7 +1524,6 @@ namespace collections::array_testing {
             );
         }
 
-        // ── crbegin() / crend() ─────────────────────────────────────────────────
         TEST_F(method_tests, crbegin__returns_const_reverse_iterator) {
             static_assert(
                 std::same_as<
@@ -1660,7 +1705,9 @@ namespace collections::array_testing {
         TEST_F(method_tests, checked_end__const_overload__returns_optional) {
             static_assert(
                 std::same_as<
-                    decltype(std::declval<const array<int, 3>&>().checked_end()),
+                    decltype(
+                        std::declval<const array<int, 3>&>().checked_end()
+                    ),
                     std::optional<array<int, 3>::const_iterator>
                 >
             );
@@ -1708,7 +1755,9 @@ namespace collections::array_testing {
 
             array mutable_values = {1, 2, 3};
             ASSERT_TRUE(mutable_values.checked_cbegin().has_value());
-            EXPECT_EQ(mutable_values.cbegin(), *mutable_values.checked_cbegin());
+            EXPECT_EQ(
+                mutable_values.cbegin(), *mutable_values.checked_cbegin()
+            );
         }
 
         TEST_F(method_tests, checked_cbegin__empty) {
@@ -1784,7 +1833,10 @@ namespace collections::array_testing {
             EXPECT_FALSE(values.checked_rbegin().has_value());
         }
 
-        TEST_F(method_tests, checked_rbegin__const_overload__returns_optional) {
+        TEST_F(
+            method_tests,
+            checked_rbegin__const_overload__returns_optional
+        ) {
             static_assert(
                 std::same_as<
                     decltype(
@@ -1880,7 +1932,6 @@ namespace collections::array_testing {
             EXPECT_FALSE(values.checked_rend().has_value());
         }
 
-        // ── checked_crbegin() / checked_crend() ─────────────────────────────────
         TEST_F(method_tests, checked_crbegin__returns_optional) {
             static_assert(
                 std::same_as<
@@ -2264,7 +2315,10 @@ namespace collections::array_testing {
             EXPECT_TRUE(std::ranges::is_sorted(values, std::greater<int>{}));
         }
 
-        TEST_F(method_tests, stable_sort__predicate_overload__empty_range_no_op) {
+        TEST_F(
+            method_tests,
+            stable_sort__predicate_overload__empty_range_no_op
+        ) {
             array values = {3, 1, 2};
             const auto before = values;
             values.stable_sort(
@@ -2313,7 +2367,9 @@ namespace collections::array_testing {
         TEST_F(trait_tests, no_narrowing_conversions) {
             static_assert(!brace_initializable<array<int, 3>, double>);
             static_assert(!brace_initializable<array<int, 3>, int, double>);
-            static_assert(!brace_initializable<array<int, 3>, int, int, double>);
+            static_assert(
+                !brace_initializable<array<int, 3>, int, int, double>
+            );
 
             static_assert(!brace_initializable<array<int, 3>, std::int64_t>);
             static_assert(!brace_initializable<array<int, 3>, int, std::int64_t>);
@@ -2327,7 +2383,9 @@ namespace collections::array_testing {
         TEST_F(trait_tests, is_default_constructible) {
             static_assert(std::is_default_constructible_v<array<int, 3>>);
             static_assert(std::is_default_constructible_v<array<double, 3>>);
-            static_assert(std::is_default_constructible_v<array<std::string, 3>>);
+            static_assert(
+                std::is_default_constructible_v<array<std::string, 3>>
+            );
 
             SUCCEED();
         }
@@ -2342,7 +2400,9 @@ namespace collections::array_testing {
             );
 
             static_assert(
-                !std::is_trivially_default_constructible_v<array<std::string, 3>>
+                !std::is_trivially_default_constructible_v<
+                        array<std::string, 3>
+                >
             );
 
             SUCCEED();
@@ -2359,7 +2419,9 @@ namespace collections::array_testing {
         }
 
         TEST_F(trait_tests, is_trivially_copy_constructible) {
-            static_assert(std::is_trivially_copy_constructible_v<array<int, 3>>);
+            static_assert(
+                std::is_trivially_copy_constructible_v<array<int, 3>>
+            );
             static_assert(
                 std::is_trivially_copy_constructible_v<array<double, 3>>
             );
@@ -2385,7 +2447,9 @@ namespace collections::array_testing {
         }
 
         TEST_F(trait_tests, is_trivially_move_constructible) {
-            static_assert(std::is_trivially_move_constructible_v<array<int, 3>>);
+            static_assert(
+                std::is_trivially_move_constructible_v<array<int, 3>>
+            );
             static_assert(
                 std::is_trivially_move_constructible_v<array<double, 3>>
             );
@@ -2435,7 +2499,9 @@ namespace collections::array_testing {
 
         TEST_F(trait_tests, is_trivially_copy_assignable) {
             static_assert(std::is_trivially_copy_assignable_v<array<int, 3>>);
-            static_assert(std::is_trivially_copy_assignable_v<array<double, 3>>);
+            static_assert(
+                std::is_trivially_copy_assignable_v<array<double, 3>>
+            );
             static_assert(
                 !std::is_trivially_copy_assignable_v<array<std::string, 3>>
             );
@@ -2458,7 +2524,9 @@ namespace collections::array_testing {
 
         TEST_F(trait_tests, is_trivially_move_assignable) {
             static_assert(std::is_trivially_move_assignable_v<array<int, 3>>);
-            static_assert(std::is_trivially_move_assignable_v<array<double, 3>>);
+            static_assert(
+                std::is_trivially_move_assignable_v<array<double, 3>>
+            );
             static_assert(
                 !std::is_trivially_move_assignable_v<array<std::string, 3>>
             );
@@ -2501,5 +2569,4 @@ namespace collections::array_testing {
             static_assert(!deducible<int, int, std::string>);
         }
     } // namespace trait_tests
-
 } // namespace collections::array_testing
