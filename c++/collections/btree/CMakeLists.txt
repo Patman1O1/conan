@@ -1,6 +1,4 @@
-#-----------------------------------------------------------------------------------------------------------------------
-# Information
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Information ──────────────────────────────────────────────────────────────
 cmake_minimum_required(VERSION 4.3.0)
 project("btree"
         VERSION 0.1.0
@@ -15,9 +13,7 @@ cmake_file_api(
         CODEMODEL 2.3
 )
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Settings
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Settings ─────────────────────────────────────────────────────────────────
 if(PROJECT_IS_TOP_LEVEL)
     # C++ Settings
     set(CMAKE_CXX_STANDARD 26)
@@ -32,7 +28,7 @@ if(PROJECT_IS_TOP_LEVEL)
 
     # Create a symlink to compile_commands.json file
     execute_process(
-        COMMAND ${CMAKE_COMMAND} -E create_symlink
+            COMMAND ${CMAKE_COMMAND} -E create_symlink
             ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
             ${CMAKE_CURRENT_SOURCE_DIR}/.clang/compile_commands.json
     )
@@ -48,62 +44,69 @@ if(PROJECT_IS_TOP_LEVEL)
     # Set default build type if not specified
     if(NOT DEFINED CMAKE_BUILD_TYPE AND NOT DEFINED CMAKE_CONFIGURATION_TYPES)
         set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-        set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+        set_property(
+                CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug"
+                "Release"
+                "MinSizeRel"
+                "RelWithDebInfo"
+        )
     endif()
 endif()
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Dependencies
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Dependencies ─────────────────────────────────────────────────────────────
 if(BUILD_TESTS)
     find_package(GTest REQUIRED)
 endif()
 
 include(GNUInstallDirs)
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Installation
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Installation ─────────────────────────────────────────────────────────────
 if(NOT CMAKE_SKIP_INSTALL_RULES)
     # Install headers
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
             TYPE INCLUDE)
 endif()
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Target: btree_headers
 # Alias: collections::btree_headers
 # Type: Interface Library
-#-----------------------------------------------------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Target definition
 add_library(btree_headers INTERFACE)
 
 # Target alias
-add_library(collections::btree_headers ALIAS btree_headers)
+add_library(collections::btree_headers
+        ALIAS
+            btree_headers
+)
 
 # Target headers
 target_include_directories(btree_headers
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-#-----------------------------------------------------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Target: btree
 # Alias: collections::btree
 # Type: Interface Library
 # Dependencies: collections::btree_headers
-#-----------------------------------------------------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # Target definition
 add_library(btree INTERFACE)
 
 # Target alias
-add_library(collections::btree ALIAS btree)
+add_library(collections::btree
+        ALIAS
+            btree
+)
 
 # Target dependencies
 target_link_libraries(btree
-    INTERFACE
-        collections::btree_headers
+        INTERFACE
+            collections::btree_headers
 )
 
 # Target properties
@@ -125,9 +128,7 @@ if(NOT CMAKE_SKIP_INSTALL_RULES)
             INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Subdirectories
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Subdirectories ───────────────────────────────────────────────────────────
 if(BUILD_TESTS)
     add_subdirectory(tests)
 endif()
