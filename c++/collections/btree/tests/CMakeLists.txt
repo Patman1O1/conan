@@ -1,34 +1,36 @@
-#-----------------------------------------------------------------------------------------------------------------------
-# Google Test
-#-----------------------------------------------------------------------------------------------------------------------
+# ── Google Test ──────────────────────────────────────────────────────────────
 include(GoogleTest)
 enable_testing()
 
-#-----------------------------------------------------------------------------------------------------------------------
-# Target: btree_test
-# Alias: collections::btree_test
+# ─────────────────────────────────────────────────────────────────────────────
+# Target: btree_tests
+# Alias: collections::btree_tests
 # Type: Executable
-# Dependencies: GTest::gtest_main, GTest::gmock_main, collections::btree_headers
-#-----------------------------------------------------------------------------------------------------------------------
+# Dependencies: GTest::gtest_main,
+#               GTest::gmock_main,
+#               collections::btree_headers
+# ─────────────────────────────────────────────────────────────────────────────
 # Target definition
-add_executable(btree_test)
+add_executable(btree_tests)
 
 # Target alias
-add_executable(collections::btree_test ALIAS btree_test)
+add_executable(collections::btree_tests
+        ALIAS btree_tests
+)
 
 # Target sources
-target_sources(btree_test
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/btree_test.cpp
+target_sources(btree_tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/btree_tests.cpp
 )
 
 # Target dependencies
-target_link_libraries(btree_test
-    PRIVATE
-        collections::btree_headers
-        GTest::gtest_main
-        GTest::gmock_main
+target_link_libraries(btree_tests
+        PRIVATE
+            collections::btree_headers
+            GTest::gtest_main
+            GTest::gmock_main
 )
 
 # Test discovery
-gtest_discover_tests(btree_test)
+gtest_discover_tests(btree_tests)
