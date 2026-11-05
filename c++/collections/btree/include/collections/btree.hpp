@@ -63,6 +63,48 @@ namespace collections {
             struct node* left;
 
             struct node* right;
+
+            // ── Methods ─────────────────────────────────────────────────────
+            [[nodiscard]]
+            [[gnu::always_inline]]
+            constexpr bool is_root() const noexcept {
+                return this->parent == nullptr;
+            }
+
+            [[nodiscard]]
+            [[gnu::always_inline]]
+            constexpr bool has_left() const noexcept {
+                return this->left != nullptr;
+            }
+
+            [[nodiscard]]
+            [[gnu::always_inline]]
+            constexpr bool has_right() const noexcept {
+                return this->right != nullptr;
+            }
+
+            [[nodiscard]]
+            constexpr struct node* inorder_successor() const noexcept {
+                // Case 1: The node has a right subtree.
+                // Find the leftmost node in the rightsubtree and return it.
+                if (this->has_right()) {
+                    struct node* node = this->right;
+                    while (node->has_left()) {
+                        node = node->left;
+                    }
+                    return node;
+                }
+
+                // Case 2: The node does not have a right subtree.
+                // Climb up the tree until either a left node or the root node
+                // is encountered (whichever comes first).
+                const struct node* node = this;
+                struct node* parent = this->parent;
+                while (!parent->is_root() && node == parent->right) {
+                    node = parent;
+                    parent = parent->parent;
+                }
+            }
         };
 
         // ── Aliases ─────────────────────────────────────────────────────────
@@ -73,12 +115,12 @@ namespace collections {
         using node_ator_traits = std::allocator_traits<node_allocator_type>;
 
         // ── Fields ──────────────────────────────────────────────────────────
-        struct node* root_;
+        struct node* root;
 
-        size_type sz_;
+        size_type sz;
 
         [[no_unique_address]]
-        allocator_type alloc_;
+        allocator_type alloc;
 
     public:
         // ── node_type ───────────────────────────────────────────────────────
@@ -95,7 +137,7 @@ namespace collections {
 
             using reference = value_type&;
 
-            using pointer = typename ator_traits::template rebind_traits<
+            using pointer = ator_traits::template rebind_traits<
                 container_node_type
             >::pointer;
         
@@ -104,37 +146,37 @@ namespace collections {
             friend class btree;
 
             // ── Fields ──────────────────────────────────────────────────────
-            pointer ptr_;
+            pointer ptr;
 
-            std::optional<allocator_type> alloc_;
+            std::optional<allocator_type> alloc;
         
         public:
             // ── Constructors ────────────────────────────────────────────────
             // TODO: Need to test
-            constexpr node_type() noexcept : ptr_(nullptr),
-                                             alloc_(std::nullopt) {}
+            constexpr node_type() noexcept : ptr(nullptr),
+                                             alloc(std::nullopt) {}
 
             constexpr node_type(const node_type&) noexcept = delete;
 
             // TODO: Need to test
             constexpr node_type(
                 node_type&& other
-            ) noexcept : ptr_(std::move(other.ptr_)), 
-                         alloc_(std::move(other.alloc_)) {
-                other.ptr_ = nullptr;
-                other.alloc_ = std::nullopt;
+            ) noexcept : ptr(std::move(other.ptr)),
+                         alloc(std::move(other.alloc)) {
+                other.ptr = nullptr;
+                other.alloc = std::nullopt;
             }
 
             // ── Destructor ──────────────────────────────────────────────────
             // TODO: Need to test
             constexpr ~node_type() noexcept {
-                if (this->ptr_ == nullptr) [[unlikely]] {
+                if (this->ptr == nullptr) [[unlikely]] {
                     return;
                 }
 
-                ator_traits::destroy(this->alloc_.value(), this->ptr_);
-                ator_traits::deallocate(this->alloc_.value(), this->ptr_);
-                this->ptr_ = nullptr;
+                ator_traits::destroy(this->alloc.value(), this->ptr);
+                ator_traits::deallocate(this->alloc.value(), this->ptr);
+                this->ptr = nullptr;
             }
 
             // ── Overloaded Operators ────────────────────────────────────────
@@ -148,11 +190,11 @@ namespace collections {
             ) noexcept -> node_type& {
                 this->~node_type();
 
-                this->ptr_ = std::move(rhs.ptr_);
-                rhs.ptr_ = nullptr;
+                this->ptr = std::move(rhs.ptr);
+                rhs.ptr = nullptr;
 
-                this->alloc_ = std::move(rhs.alloc_);
-                rhs.alloc_ = std::nullopt;
+                this->alloc = std::move(rhs.alloc);
+                rhs.alloc = std::nullopt;
 
                 return *this;
             }
@@ -161,37 +203,37 @@ namespace collections {
             [[nodiscard]]
             constexpr auto operator==(
                 const node_type& rhs
-            ) const noexcept -> bool { return this->ptr_ == rhs.ptr_; }
+            ) const noexcept -> bool { return this->ptr == rhs.ptr; }
 
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto operator!=(
                 const node_type& rhs
-            ) const noexcept -> bool { return this->ptr_ != rhs.ptr_; }
+            ) const noexcept -> bool { return this->ptr != rhs.ptr; }
 
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto operator*() const noexcept -> reference {
-                return *this->ptr_;
+                return *this->ptr;
             }
 
             // TODO: Need to test
             [[nodiscard]]
             explicit constexpr operator bool() const noexcept {
-                return this->ptr_ != nullptr;
+                return this->ptr != nullptr;
             }
 
             // ── Methods ─────────────────────────────────────────────────────
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto empty() const noexcept -> bool {
-                return this->ptr_ == nullptr;
+                return this->ptr == nullptr;
             }
 
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto value() const -> std::optional<reference> {
-                return this->ptr_ != nullptr ? *this->ptr_ : std::nullopt;
+                return this->ptr != nullptr ? *this->ptr : std::nullopt;
             }
 
             // TODO: Need to test
@@ -199,9 +241,9 @@ namespace collections {
                 ator_traits::propagate_on_container_swap::value ||
                 ator_traits::is_always_equal::value
             ) {
-                pointer tmp = this->ptr_;
-                this->ptr_ = other.ptr_;
-                other.ptr_ = tmp;
+                pointer tmp = this->ptr;
+                this->ptr = other.ptr;
+                other.ptr = tmp;
             }
         };
 
@@ -247,24 +289,24 @@ namespace collections {
             friend class btree;
 
             // ── Fields ──────────────────────────────────────────────────────
-            struct node* pos_;
+            struct node* pos;
 
         public:
             // ── Constructors ────────────────────────────────────────────────
             // TODO: Need to test
-            constexpr iterator() noexcept : pos_(nullptr) {}
+            constexpr iterator() noexcept : pos(nullptr) {}
 
             // TODO: Need to test
             explicit constexpr iterator(
                 const btree& tree
-            ) : pos_(tree.root_) {}
+            ) : pos(tree.root) {}
 
             // TODO: Need to test
             constexpr iterator(const iterator&) = default;
 
             // TODO: Need to test
-            constexpr iterator(iterator&& other) noexcept : pos_(other.pos_) {
-                other.pos_ = nullptr;
+            constexpr iterator(iterator&& other) noexcept : pos(other.pos) {
+                other.pos = nullptr;
             }
 
             // ── Destructor ──────────────────────────────────────────────────
@@ -290,22 +332,27 @@ namespace collections {
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto operator*() const noexcept -> reference {
-                return this->pos_->value;
+                return this->pos->value;
             }
 
             // TODO: Need to test
             [[nodiscard]]
             constexpr auto operator->() const noexcept -> pointer {
-                return std::addressof(this->pos_->value);
+                return std::addressof(this->pos->value);
             }
 
-            // TODO: Need to implement
-            constexpr auto operator++() noexcept -> iterator&;
+            // TODO: Need to test
+            constexpr auto operator++() noexcept -> iterator& {
+                this->pos = this->pos->left != nullptr
+                    ? this->pos->left
+                    : this->pos->parent->right;
+                return *this;
+            }
 
             // TODO: Need to test
             constexpr auto operator++(int) noexcept -> iterator& {
                 iterator tmp = *this;
-                ++(*this);
+                ++*this;
                 return *this;
             }
 
@@ -315,7 +362,7 @@ namespace collections {
             // TODO: Need to test
             constexpr auto operator--(int) noexcept -> iterator& {
                 iterator tmp = *this;
-                --(*this);
+                --*this;
                 return tmp;
             }
         };
@@ -351,17 +398,17 @@ namespace collections {
             friend class btree;
 
             // ── Fields ──────────────────────────────────────────────────────
-            struct node* pos_;
+            struct node* pos;
 
         public:
             // ── Constructors ────────────────────────────────────────────────
             // TODO: Need to test
-            constexpr const_iterator() noexcept : pos_(nullptr) {}
+            constexpr const_iterator() noexcept : pos(nullptr) {}
 
             // TODO: Need to test
             explicit constexpr const_iterator(
                 const btree& tree
-            ) : pos_(tree.root_) {}
+            ) : pos(tree.root) {}
 
             constexpr const_iterator(const const_iterator&) = default;
 
@@ -389,12 +436,12 @@ namespace collections {
 
             // TODO: Need to test
             constexpr auto operator*() const noexcept -> reference {
-                return this->pos_->value;
+                return this->pos->value;
             }
 
             // TODO: Need to test
             constexpr auto operator->() const noexcept -> pointer {
-                return std::addressof(this->pos_->value);
+                return std::addressof(this->pos->value);
             }
 
             // TODO: Need to implement
@@ -403,7 +450,7 @@ namespace collections {
             // TODO: Need to test
             constexpr auto operator++(int) noexcept -> const_iterator& {
                 const_iterator tmp = this;
-                ++(*this);
+                ++*this;
                 return tmp;
             }
 
@@ -413,7 +460,7 @@ namespace collections {
             // TODO: Need to test
             constexpr auto operator--(int) noexcept -> const_iterator& {
                 const_iterator tmp = *this;
-                --(*this);
+                --*this;
                 return tmp;
             }
         };
@@ -421,20 +468,20 @@ namespace collections {
         // ── Constructors ────────────────────────────────────────────────────
         // TODO: Need to test
         constexpr btree()
-            : root_(nullptr),
-              sz_(0),
-              alloc_(allocator_type()) {}
+            : root(nullptr),
+              sz(0),
+              alloc(allocator_type()) {}
 
         // TODO: Need to test
         explicit constexpr btree(
             const allocator_type& alloc
-        ) : root_(nullptr), sz_(0), alloc_(alloc) {}
+        ) : root(nullptr), sz(0), alloc(alloc) {}
 
         // TODO: Need to implement
         explicit constexpr btree(
             const size_type count,
             const allocator_type& alloc = allocator_type()
-        ) : sz_(count), alloc_(alloc) {
+        ) : sz(count), alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
@@ -443,7 +490,7 @@ namespace collections {
             const size_type count,
             const_reference value,
             const allocator_type& alloc = allocator_type()
-        ) : sz_(count), alloc_(alloc) {
+        ) : sz(count), alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
@@ -453,7 +500,7 @@ namespace collections {
             InputIt first,
             InputIt last,
             const allocator_type& alloc = allocator_type()
-        ) : sz_(std::distance(first, last)), alloc_(alloc) {
+        ) : sz(std::distance(first, last)), alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
         
@@ -465,7 +512,7 @@ namespace collections {
             std::from_range_t,
             R&& rg,
             const allocator_type& alloc = allocator_type()
-        ) : alloc_(alloc) {
+        ) : alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
@@ -479,7 +526,7 @@ namespace collections {
         constexpr btree(
             const btree& other,
             const std::type_identity_t<allocator_type>& alloc
-        ) : alloc_(alloc) {
+        ) : alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
@@ -487,7 +534,7 @@ namespace collections {
         constexpr btree(
             btree&& other,
             const std::type_identity_t<allocator_type>& alloc
-        ) : alloc_(alloc) {
+        ) : alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
@@ -495,14 +542,14 @@ namespace collections {
         constexpr btree(
             std::initializer_list<value_type> values,
             const allocator_type& alloc = allocator_type()
-        ) : sz_(values.size()), alloc_(alloc) {
+        ) : sz(values.size()), alloc(alloc) {
             throw std::runtime_error("Not implemented");
         }
 
         // ── Destructor ──────────────────────────────────────────────────────
         // TODO: Need to implement
         constexpr ~btree() noexcept {
-            if (this->root_ == nullptr) [[unlikely]] {
+            if (this->root == nullptr) [[unlikely]] {
                 return;
             }
             throw std::runtime_error("Not implemented");
@@ -526,7 +573,7 @@ namespace collections {
         [[nodiscard]]
         constexpr auto operator<=>(const btree& rhs) const;
 
-        // ── Methods ───────────────────────────────────────────────────────── 
+        // ── Methods ─────────────────────────────────────────────────────────
         // TODO: Need to implement
         [[nodiscard]]
         [[gnu::always_inline]]
@@ -576,9 +623,12 @@ namespace collections {
         [[nodiscard]]
         constexpr auto crend() const noexcept -> const_reverse_iterator;
 
-        // TODO: Need to implement
+        // TODO: Need to test
         [[nodiscard]]
-        constexpr auto empty() const noexcept -> bool;
+        [[gnu::always_inline]]
+        constexpr auto empty() const noexcept -> bool {
+            return this->root == nullptr;
+        }
 
         // TODO: Need to implement
         [[nodiscard]]
