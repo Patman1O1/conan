@@ -736,17 +736,17 @@ namespace collections {
         // TODO: Need to test
         [[nodiscard]]
         constexpr auto size() const noexcept -> size_type { return this->sz; }
+
+        // TODO: Need to implement
+        [[nodiscard]]
+        constexpr auto max_size() const noexcept -> size_type;
+
         
         // TODO: Need to test
         [[nodiscard]]
         constexpr auto empty() const noexcept -> bool {
             return this->root == nullptr;
         }
- 
-        // TODO: Need to implement
-        [[nodiscard]]
-        constexpr auto max_size() const noexcept -> size_type;
-
 
         // TODO: Need to implement
         template<typename... Args>
