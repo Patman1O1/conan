@@ -730,6 +730,25 @@ namespace collections {
 
         // ── Methods ─────────────────────────────────────────────────────────
         // TODO: Need to implement
+        [[nodiscard]]
+        constexpr auto get_allocator() const noexcept -> allocator_type;
+
+        // TODO: Need to test
+        [[nodiscard]]
+        constexpr auto size() const noexcept -> size_type { return this->sz; }
+        
+        // TODO: Need to test
+        [[nodiscard]]
+        constexpr auto empty() const noexcept -> bool {
+            return this->root == nullptr;
+        }
+ 
+        // TODO: Need to implement
+        [[nodiscard]]
+        constexpr auto max_size() const noexcept -> size_type;
+
+
+        // TODO: Need to implement
         template<typename... Args>
         constexpr auto emplace(Args&&... args) -> std::pair<iterator, bool>;
        
@@ -805,12 +824,6 @@ namespace collections {
             const_iterator first,
             const_iterator last
         ) -> iterator;
-
-        // TODO: Need to implement
-        [[nodiscard]]
-        [[gnu::always_inline]]
-        constexpr auto get_allocator() const noexcept -> allocator_type;
- 
         // TODO: Need to implement
         constexpr auto begin() noexcept -> iterator;
 
@@ -855,21 +868,7 @@ namespace collections {
         [[nodiscard]]
         constexpr auto crend() const noexcept -> const_reverse_iterator;
 
-        // TODO: Need to test
-        [[nodiscard]]
-        [[gnu::always_inline]]
-        constexpr auto empty() const noexcept -> bool {
-            return this->root == nullptr;
-        }
-
-        // TODO: Need to implement
-        [[nodiscard]]
-        constexpr auto size() const noexcept -> size_type;
-
-        // TODO: Need to implement
-        [[nodiscard]]
-        constexpr auto max_size() const noexcept -> size_type;
-
+         
         // TODO: Need to implement
         constexpr void clear() noexcept;
         
