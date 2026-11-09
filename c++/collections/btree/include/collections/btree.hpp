@@ -22,12 +22,22 @@ namespace collections {
     >
     class btree {
     public:
-        // ── Forward Declarations ────────────────────────────────────────────
+        // ── Forward Declarations (Public) ───────────────────────────────────
         class iterator;
 
         class const_iterator;
 
-        // ── Aliases ─────────────────────────────────────────────────────────
+        class node_type;
+
+        template<typename Iterator, typename NodeType>
+        struct insert_return_type;
+    
+    private:
+        // ── Forward Declarations (Private) ──────────────────────────────────
+        struct node;
+
+    public:
+        // ── Aliases (Public) ────────────────────────────────────────────────
         using value_type = T;
 
         using allocator_type = Allocator;
@@ -53,7 +63,14 @@ namespace collections {
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     private:
-        // ── node ────────────────────────────────────────────────────────────
+        // ── Aliases (Private) ───────────────────────────────────────────────
+        using node_allocator_type = ator_traits::template rebind_alloc<
+            struct node
+        >;
+
+        using node_ator_traits = std::allocator_traits<node_allocator_type>;
+        
+        // ── `struct node` ───────────────────────────────────────────────────
         struct node {
             // ── Fields ──────────────────────────────────────────────────────
             value_type value;
@@ -64,29 +81,47 @@ namespace collections {
 
             struct node* right;
 
+            // ── Constructors ────────────────────────────────────────────────
+            constexpr node() noexcept : parent(nullptr),
+                                        left(nullptr),
+                                        right(nullptr) {}
+
+            explicit constexpr node(const_reference value) : value(value),
+                                                             parent(nullptr),
+                                                             left(nullptr),
+                                                             right(nullptr) {}
+
+            // ── Overloaded Operators ────────────────────────────────────────
+            constexpr auto operator=(
+                const struct node&
+            ) noexcept(
+                std::is_nothrow_copy_assignable_v<value_type>
+            ) -> struct node& = default;
+
+            constexpr auto operator=(
+                struct node&&
+            ) noexcept -> struct node& = default;
+
             // ── Methods ─────────────────────────────────────────────────────
             [[nodiscard]]
-            [[gnu::always_inline]]
-            constexpr bool is_root() const noexcept {
+            constexpr auto is_root() const noexcept -> bool {
                 return this->parent == nullptr;
             }
 
             [[nodiscard]]
-            [[gnu::always_inline]]
-            constexpr bool has_left() const noexcept {
+            constexpr auto has_left() const noexcept -> bool {
                 return this->left != nullptr;
             }
 
             [[nodiscard]]
-            [[gnu::always_inline]]
-            constexpr bool has_right() const noexcept {
+            constexpr auto has_right() const noexcept -> bool {
                 return this->right != nullptr;
             }
 
             [[nodiscard]]
-            constexpr struct node* inorder_successor() const noexcept {
+            constexpr auto inorder_successor() const noexcept -> struct node* {
                 // Case 1: The node has a right subtree.
-                // Find the leftmost node in the rightsubtree and return it.
+                // Find the leftmost node in the right subtree and return it.
                 if (this->has_right()) {
                     struct node* node = this->right;
                     while (node->has_left()) {
@@ -100,30 +135,63 @@ namespace collections {
                 // is encountered (whichever comes first).
                 const struct node* node = this;
                 struct node* parent = this->parent;
-                while (!parent->is_root() && node == parent->right) {
+                while (parent != nullptr && node == parent->right) {
                     node = parent;
                     parent = parent->parent;
                 }
+
+                return parent;
+            }
+
+            constexpr void transplant(
+                struct node*& node,
+                struct node* child
+            ) noexcept {
+                if (this->is_root()) {
+                    node = child;
+                } else if (this == this->parent->left) {
+                    this->parent->left = child;
+                } else {
+                    this->parent->right = child;
+                }
+
+                if (child != nullptr) {
+                    child->parent = this->parent;
+                }
+            }
+
+            constexpr auto extract(
+                struct node*& root
+            ) noexcept -> struct node* {
+                if (!this->has_left()) {
+                    // Case 1: No left child.
+                    this->transplant(root, this->right);
+                } else if (!this->has_right()) {
+                    // Case 2: No right child.
+                    this->transplant(root, this->left);
+                } else {
+                    // Case 3: Two children.
+                    struct node* successor = this->inorder_successor();
+
+                    if (successor->parent != this) {
+                        successor->transplant(root, successor->right);
+                        successor->right = this->right;
+                        successor->right->parent = successor;
+                    }
+
+                    // Successor takes our place and adopts our left subtree.
+                    this->transplant(root, successor);
+                    successor->left = this->left;
+                    successor->left->parent = successor;
+                }
+
+                this->parent = this->left = this->right = nullptr;
+                return this;
             }
         };
 
-        // ── Aliases ─────────────────────────────────────────────────────────
-        using node_allocator_type = ator_traits::template rebind_alloc<
-            struct node
-        >;
-
-        using node_ator_traits = std::allocator_traits<node_allocator_type>;
-
-        // ── Fields ──────────────────────────────────────────────────────────
-        struct node* root;
-
-        size_type sz;
-
-        [[no_unique_address]]
-        allocator_type alloc;
-
     public:
-        // ── node_type ───────────────────────────────────────────────────────
+        // ── `node_type` ─────────────────────────────────────────────────────
         class node_type {
         public:
             // ── Aliases ─────────────────────────────────────────────────────
@@ -398,7 +466,7 @@ namespace collections {
             friend class btree;
 
             // ── Fields ──────────────────────────────────────────────────────
-            struct node* pos;
+            struct node* pos; 
 
         public:
             // ── Constructors ────────────────────────────────────────────────
@@ -465,6 +533,93 @@ namespace collections {
             }
         };
 
+    private:
+        // ── Fields ──────────────────────────────────────────────────────────
+        struct node* root;
+
+        std::size_t sz;
+
+        [[no_unique_address]]
+        node_allocator_type alloc;
+
+        [[no_unique_address]]
+        compare cmp;
+
+        // ── Methods (Private) ───────────────────────────────────────────────
+        template<typename... Args>
+        [[nodiscard]]
+        constexpr auto construct_node(Args&&... args) const -> struct node* {
+            struct node* node = node_ator_traits::allocate(this->alloc, 1);
+            try {
+                node_ator_traits::construct(
+                    this->alloc,
+                    node,
+                    std::forward<Args>(args)...
+                );
+            } catch (...) {
+                // Deallocate the memory on the heap that was reserved for
+                // the node.
+                node_ator_traits::deallocate(this->alloc, node, 1);
+                throw;
+            }
+            return node;
+        }
+
+        constexpr void destroy_node(struct node* node) noexcept {
+            node_ator_traits::destroy(this->alloc, node);
+            node_ator_traits::deallocate(this->alloc, node, 1);
+        } 
+
+        constexpr auto insert_node(struct node* node) noexcept -> bool {
+            struct node* parent = nullptr;
+            struct node** link = &this->root;
+
+            while (*link != nullptr) {
+                parent = *link;
+
+                if (this->cmp(node->value, (*link)->value)) {
+                    // Go to the left subtree.
+                    link = &parent->left;
+                } else if (this->cmp((*link)->value), node->value) {
+                    // Go to the right subtree.
+                    link = &parent->right;
+                } else {
+                    // `value` already exists in the tree.
+                    return false;
+                }
+            }
+            
+            node->parent = parent;
+            *link = node;
+            ++this->sz;
+
+            return true;
+        }
+
+        constexpr auto remove_node(
+            const_reference value
+        ) noexcept -> struct node* {
+            struct node* parent = nullptr;
+            struct node** link = &this->root;
+
+            while (*link != nullptr) {
+                parent = *link;
+                if (this->cmp(value, (*link)->value)) {
+                    // Go to the left subtree.
+                    link = &parent->left;
+                } else if (this->cmp((*link)->value), value) {
+                    // Go to the right subtree.
+                    link = &parent->right;
+                } else {
+                    
+                    return *link;
+                }
+            }
+
+            return nullptr;
+        }
+
+    public:
         // ── Constructors ────────────────────────────────────────────────────
         // TODO: Need to test
         constexpr btree()
@@ -575,6 +730,83 @@ namespace collections {
 
         // ── Methods ─────────────────────────────────────────────────────────
         // TODO: Need to implement
+        template<typename... Args>
+        constexpr auto emplace(Args&&... args) -> std::pair<iterator, bool>;
+       
+        // TODO: Need to implement
+        template<typename... Args>
+        constexpr auto emplace(
+            const_iterator pos,
+            Args&&... args
+        ) -> iterator;
+
+        // TODO: Need to implement
+        template<typename... Args>
+        constexpr auto emplace_hint(
+            const_iterator hint,
+            Args&&... args
+        ) -> iterator;
+
+
+        // TODO: Need to implement
+        constexpr auto insert(
+            const_reference value
+        ) -> std::pair<iterator, bool>;
+
+        // TODO: Need to implement
+        constexpr auto insert(value_type&& value) -> std::pair<iterator, bool>;
+
+        // TODO: Need to implement
+        constexpr auto insert(
+            const_iterator pos,
+            const_reference value
+        ) -> iterator;
+
+        // TODO: Need to implement
+        constexpr auto insert(
+            const_iterator pos,
+            value_type&& value
+        ) -> iterator;
+
+        // TODO: Need to implement
+        template<std::input_iterator InputIt>
+        constexpr void insert(InputIt first, InputIt last);
+
+        // TODO: Need to implement
+        constexpr void insert(std::initializer_list<value_type> values);
+
+        // TODO: Need to implement
+        constexpr auto insert(
+            node_type&& node_handle
+        ) -> struct insert_return_type<iterator, node_type>;
+
+        // TODO: Need to implement
+        constexpr auto insert(
+            const_iterator pos,
+            node_type&& node_handle
+        ) -> iterator;
+
+        // TODO: Need to implement
+        template<std::ranges::input_range R> requires(
+            std::convertible_to<std::ranges::range_reference_t<R>, value_type>
+        )
+        constexpr void insert_range(R&& rg);
+
+        // TODO: Need to implement
+        constexpr auto erase(iterator pos) -> iterator requires(
+            !std::same_as<iterator, const_iterator>
+        );
+
+        // TODO: Need to implement
+        constexpr auto erase(const_iterator pos) -> iterator;
+
+        // TODO: Need to implement
+        constexpr auto erase(
+            const_iterator first,
+            const_iterator last
+        ) -> iterator;
+
+        // TODO: Need to implement
         [[nodiscard]]
         [[gnu::always_inline]]
         constexpr auto get_allocator() const noexcept -> allocator_type;
@@ -640,81 +872,6 @@ namespace collections {
 
         // TODO: Need to implement
         constexpr void clear() noexcept;
-
-        // TODO: Need to implement
-        constexpr auto insert(
-            const_reference value
-        ) -> std::pair<iterator, bool>;
-
-        // TODO: Need to implement
-        constexpr auto insert(value_type&& value) -> std::pair<iterator, bool>;
-
-        // TODO: Need to implement
-        constexpr auto insert(
-            const_iterator pos,
-            const_reference value
-        ) -> iterator;
-
-        // TODO: Need to implement
-        constexpr auto insert(
-            const_iterator pos,
-            value_type&& value
-        ) -> iterator;
-
-        // TODO: Need to implement
-        template<std::input_iterator InputIt>
-        constexpr void insert(InputIt first, InputIt last);
-
-        // TODO: Need to implement
-        constexpr void insert(std::initializer_list<value_type> values);
-
-        // TODO: Need to implement
-        constexpr auto insert(
-            node_type&& node_handle
-        ) -> struct insert_return_type<iterator, node_type>;
-
-        // TODO: Need to implement
-        constexpr auto insert(
-            const_iterator pos,
-            node_type&& node_handle
-        ) -> iterator;
-
-        // TODO: Need to implement
-        template<std::ranges::input_range R> requires(
-            std::convertible_to<std::ranges::range_reference_t<R>, value_type>
-        )
-        constexpr void insert_range(R&& rg);
-
-        template<typename... Args>
-        constexpr auto emplace(Args&&... args) -> std::pair<iterator, bool>;
-       
-        // TODO: Need to implement
-        template<typename... Args>
-        constexpr auto emplace(
-            const_iterator pos,
-            Args&&... args
-        ) -> iterator;
-
-        // TODO: Need to implement
-        template<typename... Args>
-        constexpr auto emplace_hint(
-            const_iterator hint,
-            Args&&... args
-        ) -> iterator;
-
-        // TODO: Need to implement
-        constexpr auto erase(iterator pos) -> iterator requires(
-            !std::same_as<iterator, const_iterator>
-        );
-
-        // TODO: Need to implement
-        constexpr auto erase(const_iterator pos) -> iterator;
-
-        // TODO: Need to implement
-        constexpr auto erase(
-            const_iterator first,
-            const_iterator last
-        ) -> iterator;
         
         // TODO: Need to implement
         constexpr void swap(btree& other) noexcept(
