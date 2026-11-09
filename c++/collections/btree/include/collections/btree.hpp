@@ -6,10 +6,11 @@
 
 // ISO C++ Includes
 #include <concepts>
-#include <ranges>
 #include <iterator>
+#include <limits>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
@@ -737,9 +738,16 @@ namespace collections {
         [[nodiscard]]
         constexpr auto size() const noexcept -> size_type { return this->sz; }
 
-        // TODO: Need to implement
+        // TODO: Need to test
         [[nodiscard]]
-        constexpr auto max_size() const noexcept -> size_type;
+        constexpr auto max_size() const noexcept -> size_type {
+             return std::min<size_type>(
+                node_ator_traits::max_size(this->alloc),
+                static_cast<size_type>(
+                    std::numeric_limits<difference_type>::max()
+                )
+            );
+        }
 
         
         // TODO: Need to test
