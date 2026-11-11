@@ -162,26 +162,26 @@ namespace collections {
             }
 
             constexpr auto extract(
-                struct node*& root
+                struct node*& node
             ) noexcept -> struct node* {
                 if (!this->has_left()) {
                     // Case 1: No left child.
-                    this->transplant(root, this->right);
+                    this->transplant(node, this->right);
                 } else if (!this->has_right()) {
                     // Case 2: No right child.
-                    this->transplant(root, this->left);
+                    this->transplant(node, this->left);
                 } else {
                     // Case 3: Two children.
                     struct node* successor = this->inorder_successor();
 
                     if (successor->parent != this) {
-                        successor->transplant(root, successor->right);
+                        successor->transplant(node, successor->right);
                         successor->right = this->right;
                         successor->right->parent = successor;
                     }
 
                     // Successor takes our place and adopts our left subtree.
-                    this->transplant(root, successor);
+                    this->transplant(node, successor);
                     successor->left = this->left;
                     successor->left->parent = successor;
                 }
