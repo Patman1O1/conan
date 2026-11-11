@@ -120,6 +120,11 @@ namespace collections {
             }
 
             [[nodiscard]]
+            constexpr auto is_leaf() const noexcept -> bool {
+                return !this->has_left() && !this->has_right();
+            }
+
+            [[nodiscard]]
             constexpr auto inorder_successor() const noexcept -> struct node* {
                 // Case 1: The node has a right subtree.
                 // Find the leftmost node in the right subtree and return it.
@@ -145,19 +150,19 @@ namespace collections {
             }
 
             constexpr void transplant(
-                struct node*& node,
-                struct node* child
+                struct node*& subroot,
+                struct node* const node
             ) noexcept {
                 if (this->is_root()) {
-                    node = child;
+                    subroot = node;
                 } else if (this == this->parent->left) {
-                    this->parent->left = child;
+                    this->parent->left = node;
                 } else {
-                    this->parent->right = child;
+                    this->parent->right = node;
                 }
 
-                if (child != nullptr) {
-                    child->parent = this->parent;
+                if (node != nullptr) {
+                    node->parent = this->parent;
                 }
             }
 
